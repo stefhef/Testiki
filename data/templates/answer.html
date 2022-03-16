@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <link rel="stylesheet" type="text/css" href="static/css/answer.css">
+    <p>Фамилия: {{ d["surname"] }}</p>
+<p>Имя: {{ d["name"] }}</p>
+<p>Образование: {{ d["ed"] }}</p>
+<p>Профессия: {{ d["prof"] }}</p>
+<p>Пол: {{ d["sex"] }}</p>
+<p>Мотивация: {{ d["mot"] }}</p>
+<p>Готовы остаться на Марсе? {{ d["ready"] }}</p>
+{% endblock %}
