@@ -1,18 +1,44 @@
 import uvicorn as uvicorn
-from fastapi import FastAPI, Request, Depends
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, Depends, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from core.db import create_db_and_tables
-from user.models import UserDB
-from user.logic import auth_backend, current_active_user, fastapi_users
-from core.auth import middleware
+from core.db import db
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi_login import LoginManager  # Loginmanager Class
+from fastapi_login.exceptions import InvalidCredentialsException
+from user.models import user as user_model
 
-app = FastAPI(middleware=middleware)
+import asyncio
+
+app = FastAPI()
+
+SECRET = "secret-key"
+manager = LoginManager(SECRET, token_url="/auth/login", use_cookie=True)
+manager.cookie_name = "some-name"
 
 app.mount("/static", StaticFiles(directory="data/static"), name="static")
 
-templates = Jinja2Templates(directory="data/templates", auto_reload=True)
+templates = Jinja2Templates(directory="data/templates")
+
+
+@app.on_event("startup")
+async def startup():
+    await db.connect()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await db.disconnect()
+
+@manager.user_loader
+async def load_user(username: str):
+    query = user_model.select()
+    users = await db.fetch_one(query)
+    return users
+
+
+
 
 
 @app.get("/about")
@@ -28,33 +54,6 @@ async def root(request: Request):
     # return templates.TemplateResponse("main.html", {"request": request, "title": 'Главная страница'})
 
 
-app.include_router(
-    fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
-)
-app.include_router(fastapi_users.get_register_router(), prefix="/auth", tags=["auth"])
-app.include_router(
-    fastapi_users.get_reset_password_router(),
-    prefix="/auth",
-    tags=["auth"],
-)
-app.include_router(
-    fastapi_users.get_verify_router(),
-    prefix="/auth",
-    tags=["auth"],
-)
-app.include_router(fastapi_users.get_users_router(), prefix="/users", tags=["users"])
-
-
-@app.get("/authenticated-route")
-async def authenticated_route(user: UserDB = Depends(current_active_user)):
-    return {"message": f"Hello {user.email}!"}
-
-
-@app.on_event("startup")
-async def on_startup():
-    # Not needed if you setup a migration system like Alembic
-    await create_db_and_tables()
-
-
 if __name__ == "__main__":
-    uvicorn.run('main:app', log_level="info", )
+    asyncio.run(load_user('abc'))
+    # uvicorn.run('main:app', log_level="info", )
