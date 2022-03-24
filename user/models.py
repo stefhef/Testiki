@@ -8,23 +8,6 @@ from core.db import Base
 from pydantic import BaseModel
 
 
-# from core.db import metadata
-
-# user = sqlalchemy.Table(
-#     'users',
-#     metadata,
-#     sqlalchemy.Column('id', sqlalchemy.Integer, primary_key=True),
-#     sqlalchemy.Column('username', sqlalchemy.String, index=True),
-#     sqlalchemy.Column('name', sqlalchemy.String, nullable=True),
-#     sqlalchemy.Column('surname', sqlalchemy.String, nullable=True),
-#     sqlalchemy.Column('about', sqlalchemy.String, nullable=True),
-#     sqlalchemy.Column('email', sqlalchemy.String, index=True, unique=True),
-#     sqlalchemy.Column('password', sqlalchemy.String),
-#     sqlalchemy.Column('created_date', sqlalchemy.DateTime, default=datetime.datetime.now),
-#     sqlalchemy.Column('is_superuser', sqlalchemy.Boolean, default=False),
-# )
-
-
 class User(Base, SerializerMixin):
     __tablename__ = 'users'
 
@@ -48,15 +31,9 @@ class User(Base, SerializerMixin):
     #     return check_password_hash(self.hashed_password, password)
 
 
-# class User(models.BaseUser):
-#     id: int
-#     name: str
-#     surname: str
-#     about: Optional[str]
-#     email: EmailStr
-#     password: str
-#     created_date: datetime.datetime = datetime.datetime.now()
-#     is_superuser: bool = False
+class UserModel(BaseModel):
+    password: str
+    name: str
 
 
 class UserCreate(BaseModel):
@@ -69,25 +46,3 @@ class UserCreate(BaseModel):
     created_date: datetime.datetime = datetime.datetime.now()
     is_superuser: bool = False
 
-
-class UserUpdate(BaseModel):
-    id: int
-    name: str
-    surname: str
-    about: Optional[str]
-    email: EmailStr
-    password: str
-    created_date: datetime.datetime = datetime.datetime.now()
-    is_superuser: bool = False
-
-#
-# class UserDB(User, models.BaseUserDB):
-#     pass
-#     # id: int
-#     # name: str
-#     # surname: str
-#     # about: Optional[str]
-#     # email: EmailStr
-#     # password: str
-#     # created_date: datetime.datetime = datetime.datetime.now()
-#     # is_superuser: bool = False

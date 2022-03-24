@@ -5,8 +5,6 @@ from sqlalchemy.orm import sessionmaker
 DATABASE_URL = "sqlite+aiosqlite:///db/test.db"
 Base = dec.declarative_base()
 
-# metadata = sqlalchemy.MetaData()
-
 engine = create_async_engine(
     DATABASE_URL, echo=True
 )

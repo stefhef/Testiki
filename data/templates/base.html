@@ -35,6 +35,10 @@
         <input class="form-control me-2" type="search" placeholder="Искать" aria-label="Искать">
         <button class="btn btn-outline-success" type="submit">Искать тестик</button>
       </form>
+        <form>
+            <button formaction="/auth/login">Войти</button>
+        </form>
+
     </div>
   </div>
 </nav>
@@ -47,5 +51,9 @@
 <main role="main" class="container">
     {% block content %}{% endblock %}
 </main>
+
+<footer>
+    <p align="center">Сами делали, честно причестно</p>
+</footer>
 </body>
 </html>

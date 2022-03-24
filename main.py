@@ -12,14 +12,12 @@ from fastapi_login import LoginManager  # Loginmanager Class
 from fastapi_login.exceptions import InvalidCredentialsException
 from user.models import User
 from sqlalchemy import select
-
-import asyncio
+from config import SECRET_KEY
+from routers import auth_router
 
 app = FastAPI()
 
-SECRET = "secret-key"
-manager = LoginManager(SECRET, token_url="/auth/login", use_cookie=True)
-manager.cookie_name = "some-name"
+app.include_router(auth_router)
 
 app.mount("/static", StaticFiles(directory="data/static"), name="static")
 
@@ -31,14 +29,6 @@ async def startup():
     await init_db()
 
 
-@manager.user_loader
-async def load_user(username: str, session: AsyncSession) -> User:
-    # .begin()
-    query = await session.execute(select(User).where(User.username == username))
-    user = query.scalars().first()
-    return user
-
-
 @app.get("/about")
 async def say_hello(request: Request):
     return templates.TemplateResponse("about.html", {"request": request, "title": 'Главная страница'})
@@ -46,30 +36,7 @@ async def say_hello(request: Request):
 
 @app.get("/")
 async def root(request: Request, session: AsyncSession = Depends(get_session)):
-    return {"message": f"Hello"}
-    # return templates.TemplateResponse("main.html", {"request": request, "title": 'Главная страница'})
-
-
-@app.post("/auth/login")
-def login(data: OAuth2PasswordRequestForm = Depends()):
-    username = data.username
-    password = data.password
-    user = load_user(username)
-    if not user:
-        raise InvalidCredentialsException
-    elif password != user['password']:
-        raise InvalidCredentialsException
-    access_token = manager.create_access_token(
-        data={"sub": username}
-    )
-    resp = RedirectResponse(url="/private", status_code=status.HTTP_302_FOUND)
-    manager.set_cookie(resp, access_token)
-    return resp
-
-
-@app.get('/login')
-def login(request: Request, session: AsyncSession):
-    pass
+    return templates.TemplateResponse("main.html", {"request": request, "title": 'Главная страница'})
 
 
 if __name__ == "__main__":
