@@ -3,11 +3,15 @@ from fastapi import FastAPI, Request, Depends, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from core.db import db
+
+from core.db import init_db, get_session
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login import LoginManager  # Loginmanager Class
 from fastapi_login.exceptions import InvalidCredentialsException
-from user.models import user as user_model
+from user.models import User
+from sqlalchemy import select
 
 import asyncio
 
@@ -24,21 +28,15 @@ templates = Jinja2Templates(directory="data/templates")
 
 @app.on_event("startup")
 async def startup():
-    await db.connect()
+    await init_db()
 
-
-@app.on_event("shutdown")
-async def shutdown():
-    await db.disconnect()
 
 @manager.user_loader
-async def load_user(username: str):
-    query = user_model.select()
-    users = await db.fetch_one(query)
-    return users
-
-
-
+async def load_user(username: str, session: AsyncSession) -> User:
+    # .begin()
+    query = await session.execute(select(User).where(User.username == username))
+    user = query.scalars().first()
+    return user
 
 
 @app.get("/about")
@@ -47,13 +45,32 @@ async def say_hello(request: Request):
 
 
 @app.get("/")
-async def root(request: Request):
-    if request.user.is_authenticated:
-        return {"message": f"Hello hello"}
+async def root(request: Request, session: AsyncSession = Depends(get_session)):
     return {"message": f"Hello"}
     # return templates.TemplateResponse("main.html", {"request": request, "title": 'Главная страница'})
 
 
+@app.post("/auth/login")
+def login(data: OAuth2PasswordRequestForm = Depends()):
+    username = data.username
+    password = data.password
+    user = load_user(username)
+    if not user:
+        raise InvalidCredentialsException
+    elif password != user['password']:
+        raise InvalidCredentialsException
+    access_token = manager.create_access_token(
+        data={"sub": username}
+    )
+    resp = RedirectResponse(url="/private", status_code=status.HTTP_302_FOUND)
+    manager.set_cookie(resp, access_token)
+    return resp
+
+
+@app.get('/login')
+def login(request: Request, session: AsyncSession):
+    pass
+
+
 if __name__ == "__main__":
-    asyncio.run(load_user('abc'))
-    # uvicorn.run('main:app', log_level="info", )
+    uvicorn.run('main:app', log_level="info", )

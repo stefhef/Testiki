@@ -1,16 +1,29 @@
-import sqlalchemy
-import databases
-from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
+import sqlalchemy.ext.declarative as dec
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "sqlite:///db/test.db"
-Base: DeclarativeMeta = declarative_base()
-db = databases.Database(DATABASE_URL)
+DATABASE_URL = "sqlite+aiosqlite:///db/test.db"
+Base = dec.declarative_base()
 
-metadata = sqlalchemy.MetaData()
+# metadata = sqlalchemy.MetaData()
 
-
-engine = sqlalchemy.create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
+engine = create_async_engine(
+    DATABASE_URL, echo=True
 )
-metadata.create_all(engine)
 
+
+async def init_db():
+    async with engine.begin() as conn:
+        # await conn.run_sync(SQLModel.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+
+
+# Dependency
+async def get_session() -> AsyncSession:
+    async_session = sessionmaker(
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False
+    )
+    async with async_session() as session:
+        yield session
