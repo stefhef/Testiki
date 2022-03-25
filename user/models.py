@@ -1,4 +1,5 @@
 import datetime
+from enum import IntEnum
 from typing import Optional
 
 import sqlalchemy
@@ -6,6 +7,13 @@ from pydantic import EmailStr
 from sqlalchemy_serializer import SerializerMixin
 from core.db import Base
 from pydantic import BaseModel
+from sqlalchemy.orm import relationship
+
+
+class UserStatus(IntEnum):
+    ACTIVE: int = 1
+    BLOCKED: int = 2
+    UNDEFINED: int = -1
 
 
 class User(Base, SerializerMixin):
@@ -20,6 +28,9 @@ class User(Base, SerializerMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     is_admin = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=False)
+    status = sqlalchemy.Column(sqlalchemy.Enum(UserStatus), default=UserStatus.UNDEFINED)
+
+    refresh_token = relationship("RefreshToken", back_populates="user")
 
     def __repr__(self):
         return f'<User> {self.id} {self.name} {self.surname} {self.email}'
@@ -45,4 +56,3 @@ class UserCreate(BaseModel):
     password: str
     created_date: datetime.datetime = datetime.datetime.now()
     is_superuser: bool = False
-
