@@ -9,8 +9,9 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import joinedload
 
 from config import ACCESS_TOKEN_EXPIRE_MINUTES
-from user.auth import get_password_hash, verify_password, authenticate_user, create_access_token_user, \
-    create_refresh_token_user
+from user.auth import get_password_hash, verify_password, authenticate_user, \
+    create_access_token_user, \
+    create_refresh_token_user, auth_user
 from core.db import get_session
 from user.models import User
 from core.refresh_token import RefreshToken
@@ -30,7 +31,7 @@ class TokenData(BaseModel):
 
 class Token(BaseModel):
     access_token: str
-    token_type: str
+    token_type: str = "Bearer"
 
 
 @router.get("/logout")
@@ -62,9 +63,15 @@ async def login_p(request: Request,
                                           context={'request': request, 'title': 'Пароль неверный'})
 
     jwt_access_token = await create_access_token_user(user, session)
+    result = templates.TemplateResponse('login.html',
+                                        context={'request': request, 'title': 'Вошли'})
+    result.set_cookie("access_token", jwt_access_token, httponly=True)
+    return result
 
-    return templates.TemplateResponse('login.html',
-                                      context={'request': request, 'title': 'Вошли'})
+
+@router.get("/test")
+async def test_auth(current_user=Depends(auth_user)):
+    return True
 
 
 @router.get("/register", response_class=HTMLResponse)

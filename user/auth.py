@@ -1,6 +1,7 @@
 from datetime import timedelta, datetime
 from typing import Optional
 
+from fastapi import Cookie
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -33,7 +34,7 @@ async def create_access_token_user(user: User, session: AsyncSession) -> str:
     query = await session.execute(select(User)
                                   .where(User.id == user.id))
     user = query.scalars().first()
-    jwt_data = {"username": user.username}
+    jwt_data = {"email": user.email}
     jwt_token = create_jwt_token(data=jwt_data, expires_delta=jwt_token_expires)
     return jwt_token
 
@@ -42,7 +43,7 @@ async def create_access_token_user(user: User, session: AsyncSession) -> str:
 async def create_refresh_token_user(user: User,
                                     session: AsyncSession,
                                     refresh_token: Optional[str] = None) -> str:
-    jwt_token = create_jwt_token(data={"username": user.username}, verify_exp=False)
+    jwt_token = create_jwt_token(data={"email": user.email}, verify_exp=False)
     new_refresh_token = RefreshToken(token=jwt_token, user=user)
     if refresh_token:
         query = await session.execute(select(RefreshToken).where(RefreshToken.token == refresh_token,
@@ -65,8 +66,8 @@ def get_password_hash(password):
 
 
 # TODO: async context
-async def get_user(username: str, session: AsyncSession) -> Optional[User]:
-    query = await session.execute(select(User).where(User.email == username))
+async def get_user(email: str, session: AsyncSession) -> Optional[User]:
+    query = await session.execute(select(User).where(User.email == email))
     user = query.scalars().first()
     return user
 
@@ -74,10 +75,32 @@ async def get_user(username: str, session: AsyncSession) -> Optional[User]:
 async def authenticate_user(username: str, password: str, session: AsyncSession) -> Optional[User]:
     user = await get_user(username, session)
     if not user:
-        print('Нет такого пользователя')
         return None
     if not verify_password(password, user.hashed_password):
         return None
+    return user
+
+
+async def auth_user(access_token: Optional[str] = Cookie(None),
+                    session: AsyncSession = Depends(get_session)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    if not access_token:
+        raise credentials_exception
+    try:
+        payload = jwt.decode(access_token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        username: str = payload.get("email")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = await get_user(token_data.username, session)
+    if user is None:
+        raise credentials_exception
     return user
 
 
