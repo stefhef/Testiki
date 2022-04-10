@@ -1,6 +1,4 @@
-
 from typing import Optional
-
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -23,7 +21,7 @@ router = APIRouter(
     tags=["auth"]
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 
 class TokenData(BaseModel):
@@ -46,27 +44,27 @@ async def login(request: Request):
     return templates.TemplateResponse('login.html', context={'request': request, 'title': 'Авторизация'})
 
 
-@router.post("/login", response_class=HTMLResponse, )
+@router.post("/login", response_class=HTMLResponse)
 async def login_p(request: Request,
-                  refresh_token: Optional[str] = Cookie(None),
-                  session: AsyncSession = Depends(get_session),
-                  form_data: OAuth2PasswordRequestForm = Depends()):
-
-    if not all((form_data.username, form_data.password)):
+                  session: AsyncSession = Depends(get_session)):
+    data = await request.form()
+    if not all(data):
         return templates.TemplateResponse('login.html', context={'request': request, 'title': 'Не всё введено'})
 
-    user = await session.execute(select(User).where(User.email == form_data.username))
+    user = await session.execute(select(User).where(User.email == data['email']))
     user = user.scalars().first()
     if not user:
         return templates.TemplateResponse('login.html',
                                           context={'request': request, 'title': 'Такого пользователя нет'})
 
-    if not verify_password(form_data.password, user.hashed_password):
+    if not verify_password(data.get('password', None), user.hashed_password):
         return templates.TemplateResponse('login.html',
                                           context={'request': request, 'title': 'Пароль неверный'})
+
     jwt_access_token = await create_access_token_user(user, session)
-    jwt_refresh_token = await create_refresh_token_user(user, session, refresh_token)
-    return RedirectResponse('/', status_code=status.HTTP_303_SEE_OTHER)
+
+    return templates.TemplateResponse('login.html',
+                                      context={'request': request, 'title': 'Вошли'})
 
 
 @router.get("/register", response_class=HTMLResponse)
@@ -79,6 +77,7 @@ async def register_p(request: Request,
 async def register_p(request: Request,
                      session: AsyncSession = Depends(get_session)):
     data = await request.form()
+    print(data)
     if not all(data.values()):
         return templates.TemplateResponse('register.html',
                                           context={'request': request, 'title': 'Не все данные введены'})
@@ -91,6 +90,8 @@ async def register_p(request: Request,
         return templates.TemplateResponse('register.html',
                                           context={'request': request, 'title': 'Логин занят'})
     dct = dict()
+
+    print(dct)
     for key, value in data.items():
         dct[key] = value
     dct['hashed_password'] = get_password_hash(dct['hashed_password'])

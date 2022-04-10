@@ -66,7 +66,7 @@ def get_password_hash(password):
 
 # TODO: async context
 async def get_user(username: str, session: AsyncSession) -> Optional[User]:
-    query = await session.execute(select(User).where(User.username == username))
+    query = await session.execute(select(User).where(User.email == username))
     user = query.scalars().first()
     return user
 
@@ -74,6 +74,7 @@ async def get_user(username: str, session: AsyncSession) -> Optional[User]:
 async def authenticate_user(username: str, password: str, session: AsyncSession) -> Optional[User]:
     user = await get_user(username, session)
     if not user:
+        print('Нет такого пользователя')
         return None
     if not verify_password(password, user.hashed_password):
         return None

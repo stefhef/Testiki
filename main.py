@@ -1,5 +1,5 @@
 from typing import Optional
-
+import logging
 import uvicorn as uvicorn
 from fastapi import FastAPI, Request, Depends, Cookie, HTTPException, Response
 from fastapi.security import OAuth2PasswordRequestForm
@@ -15,12 +15,11 @@ from user.auth import authenticate_user, create_access_token_user, create_refres
 from user.models import User, UserModel
 
 app = FastAPI()
-
 app.include_router(auth_router)
-
 app.mount("/static", StaticFiles(directory="data/static"), name="static")
-
 templates = Jinja2Templates(directory="data/templates")
+
+logger = logging.getLogger()
 
 
 @app.on_event("startup")
@@ -28,7 +27,7 @@ async def startup():
     await init_db()
 
 
-@app.post("/token", response_model=Token)
+@app.post("/token")
 async def login_for_access_token(response: Response,
                                  form_data: OAuth2PasswordRequestForm = Depends(),
                                  refresh_token: Optional[str] = Cookie(None),
