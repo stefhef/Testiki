@@ -12,7 +12,7 @@ from config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, JWT_ALGORITHM
 from core.db import get_session
 from core.refresh_token import RefreshToken
 
-from user.models import User
+from user.models import User, UserModel, UserStatus
 
 
 class TokenData(BaseModel):
@@ -25,7 +25,7 @@ class Token(BaseModel):
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 
 async def create_access_token_user(user: User, session: AsyncSession) -> str:
@@ -33,7 +33,7 @@ async def create_access_token_user(user: User, session: AsyncSession) -> str:
     query = await session.execute(select(User)
                                   .where(User.id == user.id))
     user = query.scalars().first()
-    jwt_data = {"vk_id": user.vk_id, "is_admin": bool(user.admin), "is_teacher": bool(user.teacher)}
+    jwt_data = {"username": user.username}
     jwt_token = create_jwt_token(data=jwt_data, expires_delta=jwt_token_expires)
     return jwt_token
 
@@ -75,7 +75,7 @@ async def authenticate_user(username: str, password: str, session: AsyncSession)
     user = await get_user(username, session)
     if not user:
         return None
-    if not verify_password(password, user.password):
+    if not verify_password(password, user.hashed_password):
         return None
     return user
 
@@ -96,7 +96,7 @@ def create_jwt_token(data: dict,
     return encoded_jwt
 
 
-async def get_current_user(session: AsyncSession, token: str = Depends(oauth2_scheme)) -> User:
+async def get_current_user(session: AsyncSession = Depends(get_session), token: str = Depends(oauth2_scheme)) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -117,9 +117,8 @@ async def get_current_user(session: AsyncSession, token: str = Depends(oauth2_sc
 
 
 # Не знаю зачем...........
-"""
+
 async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
     if current_user.status != UserStatus.ACTIVE:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
     return current_user
-"""

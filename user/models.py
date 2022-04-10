@@ -43,8 +43,16 @@ class User(Base, SerializerMixin):
 
 
 class UserModel(BaseModel):
-    password: str
+    id: int
+
     name: str
+    surname: str
+    about: str
+    email: EmailStr
+    password: str
+    created_date: datetime.datetime
+    is_admin: bool
+
 
 
 class UserCreate(BaseModel):

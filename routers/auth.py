@@ -1,5 +1,6 @@
-from datetime import timedelta
+
 from typing import Optional
+
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -48,24 +49,24 @@ async def login(request: Request):
 @router.post("/login", response_class=HTMLResponse, )
 async def login_p(request: Request,
                   refresh_token: Optional[str] = Cookie(None),
-                  session: AsyncSession = Depends(get_session)):
-    data = await request.form()
-    if not all(data.values()):
+                  session: AsyncSession = Depends(get_session),
+                  form_data: OAuth2PasswordRequestForm = Depends()):
+
+    if not all((form_data.username, form_data.password)):
         return templates.TemplateResponse('login.html', context={'request': request, 'title': 'Не всё введено'})
 
-    user = await session.execute(select(User).where(User.email == data['email']))
+    user = await session.execute(select(User).where(User.email == form_data.username))
     user = user.scalars().first()
     if not user:
         return templates.TemplateResponse('login.html',
                                           context={'request': request, 'title': 'Такого пользователя нет'})
 
-    if not verify_password(data['password'], user.hashed_password):
+    if not verify_password(form_data.password, user.hashed_password):
         return templates.TemplateResponse('login.html',
                                           context={'request': request, 'title': 'Пароль неверный'})
     jwt_access_token = await create_access_token_user(user, session)
     jwt_refresh_token = await create_refresh_token_user(user, session, refresh_token)
-    request.set_cookie("refresh_token", jwt_refresh_token, httponly=True)
-    return RedirectResponse('/')
+    return RedirectResponse('/', status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/register", response_class=HTMLResponse)

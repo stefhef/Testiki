@@ -9,10 +9,10 @@ from starlette import status
 
 from core.db import init_db, get_session
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from routers import auth_router
 from routers.auth import Token
-from user.auth import authenticate_user, create_access_token_user, create_refresh_token_user
+from user.auth import authenticate_user, create_access_token_user, create_refresh_token_user, get_current_user, get_user
+from user.models import User, UserModel
 
 app = FastAPI()
 
@@ -53,7 +53,14 @@ async def say_hello(request: Request):
 
 @app.get("/")
 async def root(request: Request, session: AsyncSession = Depends(get_session)):
+    user = await get_user('Степан_Владиславович', session)
+    print(user)
     return templates.TemplateResponse("main.html", {"request": request, "title": 'Главная страница'})
+
+
+@app.get("/users/me/")
+async def read_users_me(current_user=Depends(get_current_user)):
+    return current_user
 
 
 if __name__ == "__main__":
