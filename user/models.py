@@ -35,12 +35,6 @@ class User(Base, SerializerMixin):
     def __repr__(self):
         return f'<User> {self.id} {self.name} {self.surname} {self.email}'
 
-    # def set_password(self, password):
-    #     self.hashed_password = generate_password_hash(password)
-    #
-    # def check_password(self, password):
-    #     return check_password_hash(self.hashed_password, password)
-
 
 class UserModel(BaseModel):
     id: int
@@ -52,7 +46,6 @@ class UserModel(BaseModel):
     password: str
     created_date: datetime.datetime
     is_admin: bool
-
 
 
 class UserCreate(BaseModel):

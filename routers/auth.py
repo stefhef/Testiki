@@ -11,7 +11,7 @@ from sqlalchemy.orm import joinedload
 from config import ACCESS_TOKEN_EXPIRE_MINUTES
 from user.auth import get_password_hash, verify_password, authenticate_user, \
     create_access_token_user, \
-    create_refresh_token_user, auth_user
+    create_refresh_token_user, get_current_user
 from core.db import get_session
 from user.models import User
 from core.refresh_token import RefreshToken
@@ -21,8 +21,6 @@ router = APIRouter(
     prefix="/auth",
     tags=["auth"]
 )
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 
 class TokenData(BaseModel):
@@ -70,7 +68,7 @@ async def login_p(request: Request,
 
 
 @router.get("/test")
-async def test_auth(current_user=Depends(auth_user)):
+async def test_auth(current_user=Depends(get_current_user)):
     return True
 
 
@@ -84,7 +82,6 @@ async def register_p(request: Request,
 async def register_p(request: Request,
                      session: AsyncSession = Depends(get_session)):
     data = await request.form()
-    print(data)
     if not all(data.values()):
         return templates.TemplateResponse('register.html',
                                           context={'request': request, 'title': 'Не все данные введены'})
@@ -97,8 +94,6 @@ async def register_p(request: Request,
         return templates.TemplateResponse('register.html',
                                           context={'request': request, 'title': 'Логин занят'})
     dct = dict()
-
-    print(dct)
     for key, value in data.items():
         dct[key] = value
     dct['hashed_password'] = get_password_hash(dct['hashed_password'])

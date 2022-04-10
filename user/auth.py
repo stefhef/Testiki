@@ -17,7 +17,7 @@ from user.models import User, UserModel, UserStatus
 
 
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    email: Optional[str] = None
 
 
 class Token(BaseModel):
@@ -26,17 +26,6 @@ class Token(BaseModel):
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
-
-
-async def create_access_token_user(user: User, session: AsyncSession) -> str:
-    jwt_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    query = await session.execute(select(User)
-                                  .where(User.id == user.id))
-    user = query.scalars().first()
-    jwt_data = {"email": user.email}
-    jwt_token = create_jwt_token(data=jwt_data, expires_delta=jwt_token_expires)
-    return jwt_token
 
 
 # TODO: async session context
@@ -72,8 +61,8 @@ async def get_user(email: str, session: AsyncSession) -> Optional[User]:
     return user
 
 
-async def authenticate_user(username: str, password: str, session: AsyncSession) -> Optional[User]:
-    user = await get_user(username, session)
+async def authenticate_user(email: str, password: str, session: AsyncSession) -> Optional[User]:
+    user = await get_user(email, session)
     if not user:
         return None
     if not verify_password(password, user.hashed_password):
@@ -81,7 +70,7 @@ async def authenticate_user(username: str, password: str, session: AsyncSession)
     return user
 
 
-async def auth_user(access_token: Optional[str] = Cookie(None),
+async def get_current_user(access_token: Optional[str] = Cookie(None),
                     session: AsyncSession = Depends(get_session)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -92,13 +81,13 @@ async def auth_user(access_token: Optional[str] = Cookie(None),
         raise credentials_exception
     try:
         payload = jwt.decode(access_token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
-        username: str = payload.get("email")
-        if username is None:
+        email: str = payload.get("email")
+        if email is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        token_data = TokenData(email=email)
     except JWTError:
         raise credentials_exception
-    user = await get_user(token_data.username, session)
+    user = await get_user(token_data.email, session)
     if user is None:
         raise credentials_exception
     return user
@@ -120,29 +109,11 @@ def create_jwt_token(data: dict,
     return encoded_jwt
 
 
-async def get_current_user(session: AsyncSession = Depends(get_session), token: str = Depends(oauth2_scheme)) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
-        username: str = payload.get("username")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-    user = await get_user(token_data.username, session)
-    if user is None:
-        raise credentials_exception
-    return user
-
-
-# Не знаю зачем...........
-
-async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.status != UserStatus.ACTIVE:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
-    return current_user
+async def create_access_token_user(user: User, session: AsyncSession) -> str:
+    jwt_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    query = await session.execute(select(User)
+                                  .where(User.id == user.id))
+    user = query.scalars().first()
+    jwt_data = {"email": user.email}
+    jwt_token = create_jwt_token(data=jwt_data, expires_delta=jwt_token_expires)
+    return jwt_token
