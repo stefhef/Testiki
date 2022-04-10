@@ -31,7 +31,8 @@ async def root(request: Request,
 
 @app.get("/users/me/")
 async def read_users_me(current_user=Depends(get_current_user)):
-    return current_user
+    if current_user.is_admin:
+        return current_user
 
 
 if __name__ == "__main__":

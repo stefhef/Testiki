@@ -1,5 +1,4 @@
 from typing import Optional
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi import APIRouter, status, HTTPException, Depends, Response, Request, Form, Cookie
@@ -7,10 +6,7 @@ from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import joinedload
-
-from config import ACCESS_TOKEN_EXPIRE_MINUTES
-from user.auth import get_password_hash, verify_password, authenticate_user, \
-    create_access_token_user, \
+from user.auth import get_password_hash, verify_password, create_access_token_user, \
     create_refresh_token_user, get_current_user
 from core.db import get_session
 from user.models import User
@@ -40,12 +36,14 @@ async def logout(response: Response):
 
 @router.get("/login", response_class=HTMLResponse)
 async def login(request: Request):
+    """Форма для входа"""
     return templates.TemplateResponse('login.html', context={'request': request, 'title': 'Авторизация'})
 
 
 @router.post("/login", response_class=HTMLResponse)
 async def login_p(request: Request,
                   session: AsyncSession = Depends(get_session)):
+    """Обработчик входа"""
     data = await request.form()
     if not all(data):
         return templates.TemplateResponse('login.html', context={'request': request, 'title': 'Не всё введено'})
@@ -69,7 +67,8 @@ async def login_p(request: Request,
 
 @router.get("/test")
 async def test_auth(current_user=Depends(get_current_user)):
-    return True
+    """Проверка авторизации"""
+    return current_user
 
 
 @router.get("/register", response_class=HTMLResponse)
@@ -101,7 +100,6 @@ async def register_p(request: Request,
     await session.commit()
     await session.close()
     return RedirectResponse('/auth/login')
-    # return templates.TemplateResponse('register.html', context={'request': request, 'title': 'Done'})
 
 
 @router.get("/refresh_token", response_model=Token)

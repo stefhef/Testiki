@@ -1,10 +1,8 @@
 from datetime import timedelta, datetime
 from typing import Optional
-
 from fastapi import Cookie
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -12,8 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, JWT_ALGORITHM
 from core.db import get_session
 from core.refresh_token import RefreshToken
-
-from user.models import User, UserModel, UserStatus
+from user.models import User
 
 
 class TokenData(BaseModel):
@@ -28,7 +25,6 @@ class Token(BaseModel):
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-# TODO: async session context
 async def create_refresh_token_user(user: User,
                                     session: AsyncSession,
                                     refresh_token: Optional[str] = None) -> str:
@@ -54,7 +50,6 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-# TODO: async context
 async def get_user(email: str, session: AsyncSession) -> Optional[User]:
     query = await session.execute(select(User).where(User.email == email))
     user = query.scalars().first()
@@ -72,6 +67,7 @@ async def authenticate_user(email: str, password: str, session: AsyncSession) ->
 
 async def get_current_user(access_token: Optional[str] = Cookie(None),
                     session: AsyncSession = Depends(get_session)):
+    """Возвращает пользователя если он авторизован и ошибку в противном случае"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -96,6 +92,7 @@ async def get_current_user(access_token: Optional[str] = Cookie(None),
 def create_jwt_token(data: dict,
                      expires_delta: Optional[timedelta] = None,
                      verify_exp: bool = True) -> str:
+    """Формирование JWT токена"""
     to_encode = data.copy()
     if verify_exp:
         if expires_delta:
@@ -110,6 +107,7 @@ def create_jwt_token(data: dict,
 
 
 async def create_access_token_user(user: User, session: AsyncSession) -> str:
+    """Формирование токена доступа"""
     jwt_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     query = await session.execute(select(User)
                                   .where(User.id == user.id))

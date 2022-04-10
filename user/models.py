@@ -1,12 +1,7 @@
 import datetime
 from enum import IntEnum
-from typing import Optional
-
 import sqlalchemy
-from pydantic import EmailStr
-from sqlalchemy_serializer import SerializerMixin
 from core.db import Base
-from pydantic import BaseModel
 from sqlalchemy.orm import relationship
 
 
@@ -16,7 +11,7 @@ class UserStatus(IntEnum):
     UNDEFINED: int = -1
 
 
-class User(Base, SerializerMixin):
+class User(Base):
     __tablename__ = 'users'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
@@ -34,26 +29,3 @@ class User(Base, SerializerMixin):
 
     def __repr__(self):
         return f'<User> {self.id} {self.name} {self.surname} {self.email}'
-
-
-class UserModel(BaseModel):
-    id: int
-
-    name: str
-    surname: str
-    about: str
-    email: EmailStr
-    password: str
-    created_date: datetime.datetime
-    is_admin: bool
-
-
-class UserCreate(BaseModel):
-    id: int
-    name: str
-    surname: str
-    about: Optional[str]
-    email: EmailStr
-    password: str
-    created_date: datetime.datetime = datetime.datetime.now()
-    is_superuser: bool = False

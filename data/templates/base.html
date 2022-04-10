@@ -7,48 +7,46 @@
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
-    <title>{{title}}</title>
+    <title>{{ title }}</title>
 
 </head>
 <body>
 <header>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-      <a class="navbar-brand" href="/about">Мы</a>
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/">Домашняя страница</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled">Недоступно</a>
-        </li>
-      </ul>
-      <form class="d-flex">
-        <input class="form-control me-2" type="search" placeholder="Искать" aria-label="Искать">
-        <button class="btn btn-outline-success" type="submit">Искать тестик</button>
-      </form>
-        <form>
-            <button formaction="/auth/login">Войти</button>
-        </form>
-        <form>
-            <button formaction="/auth/register">Регистрация</button>
-        </form>
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01"
+                    aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+                <img src="static/img/logo.jpg" alt="Logo" style="width: 40px; height: auto">
+                <a class="navbar-brand" href="/about">Мы</a>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/">Домашняя страница</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled">Недоступно</a>
+                    </li>
+                </ul>
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" placeholder="Искать" aria-label="Искать">
+                    <button class="btn btn-outline-success" type="submit">Искать тестик</button>
+                </form>
+                <form>
+                    <button formaction="/auth/login">Войти</button>
+                </form>
+                <form>
+                    <button formaction="/auth/register">Регистрация</button>
+                </form>
 
-    </div>
-  </div>
-</nav>
-<!--    <nav class="navbar navbar-light bg-light">-->
-<!--        <a class="navbar-brand" href="/">Тестики!</a>-->
-<!--        <a -->
-<!--    </nav>-->
+            </div>
+        </div>
+    </nav>
 </header>
 
 <main role="main" class="container">
