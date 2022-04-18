@@ -42,7 +42,8 @@ async def read_users_me(request: Request, current_user=Depends(get_current_user)
                                                   "surname": current_user.surname,
                                                   "login": current_user.username,
                                                   "email": current_user.email,
-                                                  "about": current_user.about})
+                                                  "about": current_user.about,
+                                                  "user_tests": current_user.tests})
     #  TODO: add list of tests of current user + image
 
 

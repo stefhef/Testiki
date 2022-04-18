@@ -24,6 +24,8 @@ class User(Base):
     created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     is_admin = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=False)
     status = sqlalchemy.Column(sqlalchemy.Enum(UserStatus), default=UserStatus.UNDEFINED)
+    tests = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    #  в tests - строку где id тестов пользователя через пробел
 
     refresh_token = relationship("RefreshToken", back_populates="user")
 
