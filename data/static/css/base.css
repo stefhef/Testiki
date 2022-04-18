@@ -1,0 +1,17 @@
+footer {
+    position: absolute;
+    bottom: 0;
+    left: 40%;
+}
+
+p {
+    left: 50%;
+    top: 50%;
+}
+
+.cntr {
+    height: 10em;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}

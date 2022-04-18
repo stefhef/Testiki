@@ -8,7 +8,7 @@
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
     <title>{{ title }}</title>
-
+    <link href="static/css/base.css" type="text/css" rel="stylesheet">
 </head>
 <body>
 <header>
@@ -20,19 +20,11 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-                <img src="static/img/logo.jpg" alt="Logo" style="width: 40px; height: auto">
+                <a class="navbar-brand" aria-current="page" href="/"><img src="static/img/logo.jpg"
+                                                                                     alt="Logo"
+                                                                                     style="width: 40px; height: auto">Домашняя
+                            страница</a>
                 <a class="navbar-brand" href="/about">Мы</a>
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Домашняя страница</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link disabled">Недоступно</a>
-                    </li>
-                </ul>
                 <form class="d-flex">
                     <input class="form-control me-2" type="search" placeholder="Искать" aria-label="Искать">
                     <button class="btn btn-outline-success" type="submit">Искать тестик</button>
@@ -54,7 +46,11 @@
 </main>
 
 <footer>
-    <p align="center">Сами делали, честно причестно</p>
+    <p>
+        Сами делали, честно причестно<br>
+        <a href="/insult">Обозвать разработчиков</a><br>
+        <a href="/complaint">Пожаловаться</a>
+    </p>
 </footer>
 </body>
 </html>
