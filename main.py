@@ -35,5 +35,16 @@ async def read_users_me(current_user=Depends(get_current_user)):
         return current_user
 
 
+@app.get("/profile")
+async def read_users_me(request: Request, current_user=Depends(get_current_user)):
+    return templates.TemplateResponse("me.html", {"request": request,
+                                                  "name": current_user.name,
+                                                  "surname": current_user.surname,
+                                                  "login": current_user.username,
+                                                  "email": current_user.email,
+                                                  "about": current_user.about})
+    #  TODO: add list of tests of current user + image
+
+
 if __name__ == "__main__":
     uvicorn.run('main:app', log_level="info", reload=True)
