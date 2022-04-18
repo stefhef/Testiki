@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="input-group input-group-lg">
+        <form>
+            <span class="input-group-text" id="inputGroup-sizing-lg">Жалоба</span>
+            <input type="text" class="form-control" aria-label="Sizing example input"
+                   aria-describedby="inputGroup-sizing-lg" required name="text">
+            <input type="submit" formmethod="post">
+        </form>
+    </div>
+{% endblock %}

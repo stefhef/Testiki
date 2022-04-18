@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {#  status(1) - Просто сообщение
+    status(0) - Ошибка
+#}
+
+    {% if status == 1 %}
+    <p class="text-center">{{ text }}</p>
+    {% elif status == 0 %}
+    <div class="alert alert-danger" role="alert">
+        {{ text }}
+    </div>
+    {% endif %}
+{% endblock %}

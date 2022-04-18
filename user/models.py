@@ -23,6 +23,7 @@ class User(Base):
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     is_admin = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=False)
+    vk_id = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     status = sqlalchemy.Column(sqlalchemy.Enum(UserStatus), default=UserStatus.UNDEFINED)
     tests = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     #  в tests - строку где id тестов пользователя через пробел
