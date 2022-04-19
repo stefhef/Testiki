@@ -2,10 +2,11 @@ import aiohttp as aiohttp
 import uvicorn as uvicorn
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import RedirectResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 import asyncio
+from fastapi.templating import Jinja2Templates
 from core.db import init_db, get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth_router
@@ -22,6 +23,24 @@ templates = Jinja2Templates(directory="data/templates")
 @app.on_event("startup")
 async def startup():
     await init_db()
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request, exc: StarletteHTTPException):
+    """Обработчик исключений HTTP"""
+    if exc.status_code == 401:
+        return templates.TemplateResponse('server_response.html', {"request": request, "title": exc.status_code,
+                                                                   'text': f"Не авторизованы",
+                                                                   'status': 0})
+    elif exc.status_code == 404:
+        return templates.TemplateResponse('server_response.html', {"request": request, "title": exc.status_code,
+                                                                   'text': f"Страница не найдена((",
+                                                                   'status': 0})
+    else:
+        return templates.TemplateResponse('server_response.html', {"request": request, "title": exc.status_code,
+                                                                   'text': f"Ошибочка(("
+                                                                           f"{exc.status_code}",
+                                                                   'status': 0})
 
 
 @app.get("/about")
@@ -58,6 +77,7 @@ async def p_complaint(request: Request,
 
 @app.get("/insult")
 async def complaint(request: Request,
+                    current_user=Depends(get_current_user),
                     session: AsyncSession = Depends(get_session)):
     async with aiohttp.ClientSession() as session_h:
         async with session_h.get("https://evilinsult.com/generate_insult.php?lang=ru&type=json") as resp:
@@ -67,9 +87,10 @@ async def complaint(request: Request,
         users = query.scalars().all()
         users_ids = list(map(lambda x: x.vk_id, users))
     if users_ids:
-        asyncio.create_task(vk_send_message(f"Обзываются(( {text}", users_ids))
+        asyncio.create_task(vk_send_message(f"{current_user.username} обзывается(( {text}", users_ids))
     return templates.TemplateResponse("server_response.html", {"request": request, "title": 'Сообщение сервера',
-                                                               "status": 1, "text": "Поздравляем! Вы обозвали администраторов"})
+                                                               "status": 1,
+                                                               "text": "Поздравляем! Вы обозвали администраторов"})
 
 
 @app.get("/users/me/")

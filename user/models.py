@@ -2,7 +2,6 @@ import datetime
 from enum import IntEnum
 import sqlalchemy
 from core.db import Base
-from sqlalchemy.orm import relationship
 
 
 class UserStatus(IntEnum):
@@ -25,10 +24,6 @@ class User(Base):
     is_admin = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=False)
     vk_id = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     status = sqlalchemy.Column(sqlalchemy.Enum(UserStatus), default=UserStatus.UNDEFINED)
-    tests = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    #  в tests - строку где id тестов пользователя через пробел
-
-    refresh_token = relationship("RefreshToken", back_populates="user")
 
     def __repr__(self):
         return f'<User> {self.id} {self.name} {self.surname} {self.email}'

@@ -30,8 +30,8 @@ class Test(Base):
     author = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     is_hidden = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=False)
-    questions = orm.relation("questions",
-                             secondary=questions_to_test,
+    questions = orm.relation("Question",
+                             secondary="questions_to_test",
                              backref="tests")
 
 
@@ -40,8 +40,8 @@ class Question(Base):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     question = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    answers = orm.relation("answers",
-                           secondary=answers_to_question,
+    answers = orm.relation("Answer",
+                           secondary="answers_to_question",
                            backref="questions")
 
 

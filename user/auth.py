@@ -9,7 +9,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, JWT_ALGORITHM
 from core.db import get_session
-from core.refresh_token import RefreshToken
 from user.models import User
 
 
@@ -17,29 +16,7 @@ class TokenData(BaseModel):
     email: Optional[str] = None
 
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-async def create_refresh_token_user(user: User,
-                                    session: AsyncSession,
-                                    refresh_token: Optional[str] = None) -> str:
-    jwt_token = create_jwt_token(data={"email": user.email}, verify_exp=False)
-    new_refresh_token = RefreshToken(token=jwt_token, user=user)
-    if refresh_token:
-        query = await session.execute(select(RefreshToken).where(RefreshToken.token == refresh_token,
-                                                                 RefreshToken.user == user))
-        old_refresh_token = query.scalars().first()
-        if old_refresh_token:
-            await session.delete(old_refresh_token)
-            await session.commit()
-    session.add(new_refresh_token)
-    await session.commit()
-    return jwt_token
 
 
 def verify_password(plain_password, hashed_password) -> bool:
@@ -66,7 +43,7 @@ async def authenticate_user(email: str, password: str, session: AsyncSession) ->
 
 
 async def get_current_user(access_token: Optional[str] = Cookie(None),
-                    session: AsyncSession = Depends(get_session)):
+                           session: AsyncSession = Depends(get_session)):
     """Возвращает пользователя если он авторизован и ошибку в противном случае"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

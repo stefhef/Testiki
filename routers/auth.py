@@ -7,10 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import joinedload
 from user.auth import get_password_hash, verify_password, create_access_token_user, \
-    create_refresh_token_user, get_current_user
+    get_current_user
 from core.db import get_session
 from user.models import User
-from core.refresh_token import RefreshToken
 
 templates = Jinja2Templates(directory="data/templates")
 router = APIRouter(
@@ -101,22 +100,3 @@ async def register_p(request: Request,
     await session.close()
     return RedirectResponse('/auth/login')
 
-
-@router.get("/refresh_token", response_model=Token)
-async def refresh(response: Response,
-                  refresh_token: Optional[str] = Cookie(None),
-                  session: AsyncSession = Depends(get_session)):
-    query = await session.execute(select(RefreshToken)
-                                  .where(RefreshToken.token == refresh_token)
-                                  .options(joinedload(RefreshToken.user)))
-    db_refresh_token = query.scalars().first()
-    if db_refresh_token:
-        db_user = db_refresh_token.user
-        jwt_access_token = await create_access_token_user(db_user, session)
-        jwt_refresh_token = await create_refresh_token_user(db_user, session, refresh_token)
-        response.set_cookie("refresh_token", jwt_refresh_token, httponly=True)
-        return Token(access_token=jwt_access_token)
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bad refresh token. Need to reauthorize.")
