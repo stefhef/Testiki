@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="http://127.0.0.1:8000/obr">
+{% for question in range(n_questions) %}
+    <p><input type="text" class="form-control" placeholder="Введите вопрсик">
+        введите ответики:
+    {% for question in range(n_answers) %}
+            <br><input type="text" class="answer">
+        {% endfor %}
+    {% endfor %}
+    <br></p>
+<button type="submit" class="btn btn-primary">Записаться</button>
+</form>
+{% endblock %}
