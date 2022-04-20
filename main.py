@@ -1,6 +1,6 @@
 import aiohttp as aiohttp
 import uvicorn as uvicorn
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, Form
 from fastapi.responses import RedirectResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
@@ -109,6 +109,29 @@ async def read_users_me(request: Request, current_user=Depends(get_current_user)
                                                   "about": current_user.about,
                                                   "user_tests": current_user.tests})
     #  TODO: add list of tests of current user + image
+
+
+@app.get("/db_ks")
+async def db_ks(request: Request,
+                session: AsyncSession = Depends(get_session)):
+    return templates.TemplateResponse('test_f.html', context={'request': request, 'title': 'dtht'})
+
+
+@app.post('/db_ks')
+async def db_ks(request: Request,
+                session: AsyncSession = Depends(get_session)):
+    data = await request.form()
+    return templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'dtht',
+                                                              'n_questions': int(data['questions']),
+                                                              'n_answers': int(data['answers'])})
+
+
+@app.post('/obr')
+async def obr(request: Request,
+                session: AsyncSession = Depends(get_session)):
+    data = await request.form()
+    print(data)
+    return
 
 
 if __name__ == "__main__":

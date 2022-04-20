@@ -6,6 +6,8 @@ from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import joinedload
+
+from test import Answer
 from user.auth import get_password_hash, verify_password, create_access_token_user, \
     get_current_user
 from core.db import get_session
