@@ -4,12 +4,14 @@ from fastapi import FastAPI, Request, Depends, Form
 from fastapi.responses import RedirectResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select
+from sqlalchemy import select, insert
 import asyncio
 from fastapi.templating import Jinja2Templates
 from core.db import init_db, get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth_router
+from test import Question
+from test.models import Test
 from user.auth import get_current_user
 from core.vk import vk_send_message
 from user.models import User
@@ -121,15 +123,36 @@ async def db_ks(request: Request,
 async def db_ks(request: Request,
                 session: AsyncSession = Depends(get_session)):
     data = await request.form()
-    return templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'dtht',
-                                                              'n_questions': int(data['questions']),
-                                                              'n_answers': int(data['answers'])})
+    answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'dtht',
+                                                                        'n_questions': int(data['questions']),
+                                                                        'n_answers': int(data['answers'])})
+    answ_and_quest.set_cookie('questions', data['questions'], httponly=True)
+    answ_and_quest.set_cookie('answers', data['answers'], httponly=True)
+    return answ_and_quest
 
 
 @app.post('/obr')
 async def obr(request: Request,
-                session: AsyncSession = Depends(get_session)):
+              session: AsyncSession = Depends(get_session)):
+    q, a = await get_current_user('questions'), await get_current_user('answers')
     data = await request.form()
+    if not all(data):
+        return templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'Не всё введено',
+                                                                  'n_questions': q,
+                                                                  'n_answers': a})
+    dct = {
+
+    }
+    await session.execute(insert(Test).values)
+    for i in range(q * a):
+        if i % (a + 1) == 0:
+            now_question = Question(question=data[0][i])
+            print(now_question.id)
+            await session.execute(insert(Question).values(**{'question': data[0][i]}))
+
+            await session.commit()
+            await session.close()
+
     print(data)
     return
 

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form action="http://127.0.0.1:8000/obr">
+<form action="/obr" method="post">
 {% for question in range(n_questions) %}
-    <p><input type="text" class="form-control" placeholder="Введите вопрсик">
+    <p><input type="text" class="form-control" placeholder="Введите вопрсик" name="question">
         введите ответики:
     {% for question in range(n_answers) %}
-            <br><input type="text" class="answer">
+            <br><input type="text" class="answer" name="answer">
         {% endfor %}
     {% endfor %}
     <br></p>
