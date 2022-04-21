@@ -1,6 +1,8 @@
+from typing import Optional
+
 import aiohttp as aiohttp
 import uvicorn as uvicorn
-from fastapi import FastAPI, Request, Depends, Form
+from fastapi import FastAPI, Request, Depends, Form, Cookie
 from fastapi.responses import RedirectResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
@@ -11,7 +13,7 @@ from core.db import init_db, get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth_router
 from test import Question
-from test.models import Test
+from test.models import Test, Answer
 from user.auth import get_current_user
 from core.vk import vk_send_message
 from user.models import User
@@ -133,8 +135,10 @@ async def db_ks(request: Request,
 
 @app.post('/obr')
 async def obr(request: Request,
-              session: AsyncSession = Depends(get_session)):
-    q, a = await get_current_user('questions'), await get_current_user('answers')
+              session: AsyncSession = Depends(get_session),
+              questions: Optional[int] = Cookie(None),
+              answers: Optional[int] = Cookie(None)):
+    q, a = questions, answers
     data = await request.form()
     if not all(data):
         return templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'Не всё введено',
@@ -143,15 +147,17 @@ async def obr(request: Request,
     dct = {
 
     }
-    await session.execute(insert(Test).values)
-    for i in range(q * a):
-        if i % (a + 1) == 0:
-            now_question = Question(question=data[0][i])
+    # await session.execute(insert(Test).values)
+    for key, value in data.items():
+        if 'question' in key:
+            now_question = Question(question=value)
             print(now_question.id)
-            await session.execute(insert(Question).values(**{'question': data[0][i]}))
-
-            await session.commit()
-            await session.close()
+            await session.execute(insert(Question).values(**{'question': value}))
+        elif 'answer' in key:
+            await session.execute(insert(Answer).values(**{'answer': value,
+                                                           'is_true': 0}))
+        await session.commit()
+        await session.close()
 
     print(data)
     return
