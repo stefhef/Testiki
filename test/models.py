@@ -27,7 +27,7 @@ class Test(Base):
     test_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     about = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     author = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
-    created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
+    created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now())
     is_hidden = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=False)
     questions = orm.relation("Question",
                              secondary='questions_to_test',

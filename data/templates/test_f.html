@@ -4,11 +4,15 @@
 <h1 align="middle">dsgr</h1>
 <div>
     <form class="login_form" method="post">
+        <input type="text" class="form-control" id="test_name" aria-describedby="questionsHelp"
+               placeholder="Название тестика" name="test_name">
+        <input type="text" class="form-control" id="about_test" aria-describedby="questionsHelp"
+               placeholder="О тестике" name="about_test">
         <input type="text" class="form-control" id="questions" aria-describedby="questionsHelp"
-               placeholder="Введите количество вопросов" name="questions">
+               placeholder="Введите количество вопросиков" name="questions">
         <input type="text" class="form-control" id="answers" aria-describedby="answersHelp"
-               placeholder="Введите количество ответов на вопрс" name="answers">
-        <button type="submit" class="btn btn-primary">Записаться</button>
+               placeholder="Введите количество ответиков на вопрсик" name="answers">
+        <button type="submit" class="btn btn-primary">Далее</button>
     </form>
 </div>
 {% endblock %}

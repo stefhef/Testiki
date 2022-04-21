@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 import aiohttp as aiohttp
@@ -123,13 +124,23 @@ async def db_ks(request: Request,
 
 @app.post('/db_ks')
 async def db_ks(request: Request,
-                session: AsyncSession = Depends(get_session)):
+                session: AsyncSession = Depends(get_session),
+                current_user=Depends(get_current_user)):
     data = await request.form()
     answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'dtht',
                                                                         'n_questions': int(data['questions']),
                                                                         'n_answers': int(data['answers'])})
     answ_and_quest.set_cookie('questions', data['questions'], httponly=True)
     answ_and_quest.set_cookie('answers', data['answers'], httponly=True)
+
+    dct = {'test_name': data['test_name'],
+           'about': data['about_test'],
+           'author': current_user.id,
+           'created_date': datetime.datetime.now(),
+           'is_hidden': False}
+    print(dct)
+    await session.execute(insert(Test).values(**dct))
+
     return answ_and_quest
 
 
@@ -144,22 +155,15 @@ async def obr(request: Request,
         return templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'Не всё введено',
                                                                   'n_questions': q,
                                                                   'n_answers': a})
-    dct = {
 
-    }
-    # await session.execute(insert(Test).values)
     for key, value in data.items():
         if 'question' in key:
-            now_question = Question(question=value)
-            print(now_question.id)
             await session.execute(insert(Question).values(**{'question': value}))
         elif 'answer' in key:
-            await session.execute(insert(Answer).values(**{'answer': value,
-                                                           'is_true': 0}))
+            await session.execute(insert(Answer).values(**{'answer': value, 'is_true': False}))
         await session.commit()
         await session.close()
 
-    print(data)
     return
 
 
