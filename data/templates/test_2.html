@@ -7,7 +7,7 @@
         введите ответики и отметьте какой из них правильный:
         {% for answer in range(n_answers) %}
         <br><input type="text" class="answer" name="answer{{ question }}{{ answer }}">
-        <input type="radio" name="raz{{ question }}" value="{{ question }}{{ answer }}"/>
+        <input type="radio" name="is_true{{ question }}" value="{{ question }}{{ answer }}"/>
         {% endfor %}
         {% endfor %}
         <br></p>

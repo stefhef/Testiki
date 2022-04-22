@@ -7,13 +7,13 @@ from fastapi import FastAPI, Request, Depends, Form, Cookie
 from fastapi.responses import RedirectResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, func
 import asyncio
 from fastapi.templating import Jinja2Templates
 from core.db import init_db, get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth_router
-from test import Question
+from test import Question, models
 from test.models import Test, Answer
 from user.auth import get_current_user
 from core.vk import vk_send_message
@@ -149,12 +149,14 @@ async def db_ks(request: Request,
 @app.post('/obr')
 async def obr(request: Request,
               session: AsyncSession = Depends(get_session),
+              current_user=Depends(get_current_user),
               questions: Optional[int] = Cookie(None),
               answers: Optional[int] = Cookie(None)):
     q, a = questions, answers
     data = await request.form()
     if not all(data):
-        return templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'Не всё введено',
+        return templates.TemplateResponse('test_2.html', context={'request': request,
+                                                                  'title': 'Не всё введено',
                                                                   'n_questions': q,
                                                                   'n_answers': a})
 
@@ -162,7 +164,14 @@ async def obr(request: Request,
         if 'question' in key:
             await session.execute(insert(Question).values(**{'question': value}))
         elif 'answer' in key:
-            await session.execute(insert(Answer).values(**{'answer': value, 'is_true': False}))
+            answer = models.Answer(answer=value, is_true=False, id_author=current_user.id, id_users_now='hhhh')
+            session.add(answer)
+            """await session.execute(insert(Answer).values(**{'answer': value,
+                                                           'is_true': False,
+                                                           'id_author': current_user.id}))"""
+        elif 'is_true' in key:
+            pass
+            id_question = session.query(User).filter(User.id == session.query(func.max(User.id)))
         await session.commit()
         await session.close()
 

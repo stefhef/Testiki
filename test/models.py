@@ -39,6 +39,7 @@ class Question(Base):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     question = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    id_author = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     answers = orm.relation("Answer",
                            secondary='answers_to_question',
                            backref="questions")
@@ -49,4 +50,6 @@ class Answer(Base):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     answer = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    is_true = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False)
+    is_true = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=False)
+    id_author = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    id_users_now = sqlalchemy.Column(sqlalchemy.String, nullable=True)
