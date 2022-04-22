@@ -60,7 +60,7 @@ async def login_p(request: Request,
                                           context={'request': request, 'title': 'Пароль неверный'})
 
     jwt_access_token = await create_access_token_user(user, session)
-    result = templates.TemplateResponse('login.html',
+    result = templates.TemplateResponse('main.html',
                                         context={'request': request, 'title': 'Вошли'})
     result.set_cookie("access_token", jwt_access_token, httponly=True)
     return result

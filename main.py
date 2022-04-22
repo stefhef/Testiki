@@ -35,7 +35,7 @@ async def http_exception_handler(request, exc: StarletteHTTPException):
     """Обработчик исключений HTTP"""
     if exc.status_code == 401:
         return templates.TemplateResponse('server_response.html', {"request": request, "title": exc.status_code,
-                                                                   'text': f"Не авторизованы",
+                                                                   'text': f"Не авторизованы ай-ай",
                                                                    'status': 0})
     elif exc.status_code == 404:
         return templates.TemplateResponse('server_response.html', {"request": request, "title": exc.status_code,
@@ -140,6 +140,8 @@ async def db_ks(request: Request,
            'is_hidden': False}
     print(dct)
     await session.execute(insert(Test).values(**dct))
+    await session.commit()
+    await session.close()
 
     return answ_and_quest
 
@@ -164,7 +166,7 @@ async def obr(request: Request,
         await session.commit()
         await session.close()
 
-    return
+    return templates.TemplateResponse("main.html", {"request": request, "title": 'Главная страница'})
 
 
 if __name__ == "__main__":
