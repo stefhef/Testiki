@@ -105,15 +105,18 @@ async def read_users_me(current_user=Depends(get_current_user)):
 
 
 @app.get("/profile")
-async def read_users_me(request: Request, current_user=Depends(get_current_user)):
+async def read_users_me(request: Request, current_user=Depends(get_current_user),
+                        session: AsyncSession = Depends(get_session)):
+    query = await session.execute(select(Test).where(Test.author == current_user.id))
+    tests = query.scalars().all()
+
     return templates.TemplateResponse("me.html", {"request": request,
                                                   "name": current_user.name,
                                                   "surname": current_user.surname,
                                                   "login": current_user.username,
                                                   "email": current_user.email,
                                                   "about": current_user.about,
-                                                  "user_tests": current_user.tests})
-    #  TODO: add list of tests of current user + image
+                                                  "user_tests": tests})
 
 
 @app.get("/db_ks")
