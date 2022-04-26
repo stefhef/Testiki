@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request, Depends, Form, Cookie
 from fastapi.responses import RedirectResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, insert, func
+from sqlalchemy import select, insert, func, update
 import asyncio
 from fastapi.templating import Jinja2Templates
 from core.db import init_db, get_session
@@ -127,6 +127,8 @@ async def db_ks(request: Request,
                 session: AsyncSession = Depends(get_session),
                 current_user=Depends(get_current_user)):
     data = await request.form()
+    if not all(data.values()):
+        return templates.TemplateResponse('test_f.html', context={'request': request, 'title': 'АЙ-ай-ай'})
     answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'dtht',
                                                                         'n_questions': int(data['questions']),
                                                                         'n_answers': int(data['answers'])})
@@ -153,8 +155,13 @@ async def obr(request: Request,
               questions: Optional[int] = Cookie(None),
               answers: Optional[int] = Cookie(None)):
     q, a = questions, answers
+
+    if q == 0 or a == 0:
+        return templates.TemplateResponse('server_response.html', context={'request': request,
+                                                                           'text': 'Эммммммм',
+                                                                           'status': 0})
     data = await request.form()
-    if not all(data):
+    if not all(data.values()):
         return templates.TemplateResponse('test_2.html', context={'request': request,
                                                                   'title': 'Не всё введено',
                                                                   'n_questions': q,
@@ -162,20 +169,25 @@ async def obr(request: Request,
 
     for key, value in data.items():
         if 'question' in key:
-            await session.execute(insert(Question).values(**{'question': value}))
+            await session.execute(insert(Question).values(question=value))
         elif 'answer' in key:
-            answer = models.Answer(answer=value, is_true=False, id_author=current_user.id, id_users_now='hhhh')
+            answer = Answer(answer=value, is_true=False, id_author=current_user.id, id_users_now=None)
             session.add(answer)
             """await session.execute(insert(Answer).values(**{'answer': value,
                                                            'is_true': False,
                                                            'id_author': current_user.id}))"""
         elif 'is_true' in key:
-            pass
-            id_question = session.query(User).filter(User.id == session.query(func.max(User.id)))
+            req = await session.execute(select(func.max(Answer.id)).where(Answer.id_author == current_user.id))
+            id_t = req.scalars().first()
+            await session.execute(update(Answer).where(Answer.id == id_t).values(is_true=True))
+
         await session.commit()
         await session.close()
 
-    return templates.TemplateResponse("main.html", {"request": request, "title": 'Главная страница'})
+    response = templates.TemplateResponse("main.html", {"request": request, "title": 'Главная страница'})
+    response.set_cookie('answers', '0')
+    response.set_cookie('questions', '0')
+    return response
 
 
 if __name__ == "__main__":
