@@ -6,10 +6,12 @@
 #}
 
     {% if status == 1 %}
-    <p class="text-center">{{ text }}</p>
+        <div class="alert alert-info" role="alert">
+            {{ text }}
+        </div>
     {% elif status == 0 %}
-    <div class="alert alert-danger" role="alert">
-        {{ text }}
-    </div>
+        <div class="alert alert-danger" role="alert">
+            {{ text }}
+        </div>
     {% endif %}
 {% endblock %}

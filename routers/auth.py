@@ -78,6 +78,14 @@ async def register_p(request: Request,
     return templates.TemplateResponse('register.html', context={'request': request, 'title': 'Авторизация'})
 
 
+@router.get("/lost_password")
+async def lost_password(request: Request,
+                     session: AsyncSession = Depends(get_session)):
+    return templates.TemplateResponse("server_response.html", context={'request': request, 'title': 'Хехехе',
+                                                                       'text': 'Ну сами виноваты',
+                                                                       'status': 1})
+
+
 @router.post("/register", response_class=HTMLResponse)
 async def register_p(request: Request,
                      session: AsyncSession = Depends(get_session)):

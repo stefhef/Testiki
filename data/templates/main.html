@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
     <div>
-        <button name="make_test" onclick="window.location.href='/db_ks'">Создать тестик</button>
+        <button name="make_test" onclick="window.location.href='/db_ks'" class="btn btn-primary" id="make_test">Создать тестик</button>
         <p class="cntr">Тут будут тестики</p>
     </div>
 {% endblock %}

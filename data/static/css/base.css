@@ -1,12 +1,22 @@
-footer {
-    position: absolute;
-    bottom: 0;
-    left: 40%;
+main {
+  min-height: calc(100vh - 30px - 18px);
 }
 
-p {
-    left: 50%;
-    top: 50%;
+footer {
+  height: 30px;
+}
+
+p.footer {
+    text-align: center;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    background-color: rgba(138,150,196,0.58);
+    width: auto;
+    font-size: 10px;
+}
+
+a.footer {
+    color: #00aeef;
 }
 
 .cntr {
