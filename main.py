@@ -14,7 +14,7 @@ from core.db import init_db, get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth_router
 from test import Question, models
-from test.models import Test, Answer
+from test.models import Test, Answer, questions_to_test, answers_to_question
 from user.auth import get_current_user
 from core.vk import vk_send_message
 from user.models import User
@@ -131,23 +131,14 @@ async def db_ks(request: Request,
                 current_user=Depends(get_current_user)):
     data = await request.form()
     if not all(data.values()):
-        return templates.TemplateResponse('test_f.html', context={'request': request, 'title': 'АЙ-ай-ай'})
+        return templates.TemplateResponse('test_f.html', context={'request': request, 'title': 'Ай-ай-ай'})
     answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'dtht',
                                                                         'n_questions': int(data['questions']),
                                                                         'n_answers': int(data['answers'])})
     answ_and_quest.set_cookie('questions', data['questions'], httponly=True)
     answ_and_quest.set_cookie('answers', data['answers'], httponly=True)
-
-    dct = {'test_name': data['test_name'],
-           'about': data['about_test'],
-           'author': current_user.id,
-           'created_date': datetime.datetime.now(),
-           'is_hidden': False}
-    print(dct)
-    await session.execute(insert(Test).values(**dct))
-    await session.commit()
-    await session.close()
-
+    answ_and_quest.set_cookie('test_name', data['test_name'], httponly=True)
+    answ_and_quest.set_cookie('about', data['about_test'], httponly=True)
     return answ_and_quest
 
 
@@ -156,10 +147,10 @@ async def obr(request: Request,
               session: AsyncSession = Depends(get_session),
               current_user=Depends(get_current_user),
               questions: Optional[int] = Cookie(None),
-              answers: Optional[int] = Cookie(None)):
-    q, a = questions, answers
-
-    if q == 0 or a == 0:
+              answers: Optional[int] = Cookie(None),
+              test_name: Optional[str] = Cookie(None),
+              about: Optional[str] = Cookie(None)):
+    if questions == 0 or answers == 0:
         return templates.TemplateResponse('server_response.html', context={'request': request,
                                                                            'text': 'Эммммммм',
                                                                            'status': 0})
@@ -167,23 +158,32 @@ async def obr(request: Request,
     if not all(data.values()):
         return templates.TemplateResponse('test_2.html', context={'request': request,
                                                                   'title': 'Не всё введено',
-                                                                  'n_questions': q,
-                                                                  'n_answers': a})
+                                                                  'n_questions': questions,
+                                                                  'n_answers': answers})
+    test = Test(author=current_user.id,
+                test_name=test_name,
+                about=about,
+                created_date=datetime.datetime.now())
 
     for key, value in data.items():
+        old_question = 0
         if 'question' in key:
-            await session.execute(insert(Question).values(question=value))
+            if int(key[8:]) > old_question:
+                test.questions.append(question)
+                session.add(question)
+                old_question = int(key[8:])
+            question = Question(question=value, id_author=current_user.id)
         elif 'answer' in key:
-            answer = Answer(answer=value, is_true=False, id_author=current_user.id, id_users_now=None)
+            answer = Answer(answer=value, is_true=False, id_author=current_user.id)
+            question.answers.append(answer)
             session.add(answer)
-            """await session.execute(insert(Answer).values(**{'answer': value,
-                                                           'is_true': False,
-                                                           'id_author': current_user.id}))"""
         elif 'is_true' in key:
-            req = await session.execute(select(func.max(Answer.id)).where(Answer.id_author == current_user.id))
+            req = await session.execute(select(func.max(Answer.id))
+                                        .where(Answer.id_author == current_user.id))
             id_t = req.scalars().first()
             await session.execute(update(Answer).where(Answer.id == id_t).values(is_true=True))
 
+        session.add(test)
         await session.commit()
         await session.close()
 
@@ -191,6 +191,14 @@ async def obr(request: Request,
     response.set_cookie('answers', '0')
     response.set_cookie('questions', '0')
     return response
+
+
+@app.get('/testik/{test_id}')
+async def testik(test_id: int,
+                 request: Request,
+                 session: AsyncSession = Depends(get_session),
+                 current_user=Depends(get_current_user)):
+    questions = await session.execute(select(Question).where(Test.id == test_id).all())
 
 
 if __name__ == "__main__":
