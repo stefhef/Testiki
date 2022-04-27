@@ -131,7 +131,7 @@ async def db_ks(request: Request,
                 current_user=Depends(get_current_user)):
     data = await request.form()
     if not all(data.values()):
-        return templates.TemplateResponse('test_f.html', context={'request': request, 'title': 'АЙ-ай-ай'})
+        return templates.TemplateResponse('test_f.html', context={'request': request, 'title': 'Ай-ай-ай'})
     answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'dtht',
                                                                         'n_questions': int(data['questions']),
                                                                         'n_answers': int(data['answers'])})
@@ -141,9 +141,8 @@ async def db_ks(request: Request,
     dct = {'test_name': data['test_name'],
            'about': data['about_test'],
            'author': current_user.id,
-           'created_date': datetime.datetime.now(),
-           'is_hidden': False}
-    print(dct)
+           'created_date': datetime.datetime.now()}
+
     await session.execute(insert(Test).values(**dct))
     await session.commit()
     await session.close()
@@ -157,9 +156,7 @@ async def obr(request: Request,
               current_user=Depends(get_current_user),
               questions: Optional[int] = Cookie(None),
               answers: Optional[int] = Cookie(None)):
-    q, a = questions, answers
-
-    if q == 0 or a == 0:
+    if questions == 0 or answers == 0:
         return templates.TemplateResponse('server_response.html', context={'request': request,
                                                                            'text': 'Эммммммм',
                                                                            'status': 0})
@@ -167,18 +164,19 @@ async def obr(request: Request,
     if not all(data.values()):
         return templates.TemplateResponse('test_2.html', context={'request': request,
                                                                   'title': 'Не всё введено',
-                                                                  'n_questions': q,
-                                                                  'n_answers': a})
-
+                                                                  'n_questions': questions,
+                                                                  'n_answers': answers})
     for key, value in data.items():
+        old_question = 0
         if 'question' in key:
-            await session.execute(insert(Question).values(question=value))
+            if int(key[8:]) > old_question:
+                session.add(question)
+                old_question = int(key[8:])
+            question = Question(question=value, id_author=current_user.id)
         elif 'answer' in key:
-            answer = Answer(answer=value, is_true=False, id_author=current_user.id, id_users_now=None)
+            answer = Answer(answer=value, is_true=False, id_author=current_user.id)
+            question.answers.append(answer)
             session.add(answer)
-            """await session.execute(insert(Answer).values(**{'answer': value,
-                                                           'is_true': False,
-                                                           'id_author': current_user.id}))"""
         elif 'is_true' in key:
             req = await session.execute(select(func.max(Answer.id)).where(Answer.id_author == current_user.id))
             id_t = req.scalars().first()
@@ -191,6 +189,14 @@ async def obr(request: Request,
     response.set_cookie('answers', '0')
     response.set_cookie('questions', '0')
     return response
+
+
+@app.get('/testik/{test_id}')
+async def testik(test_id: int,
+                 request: Request,
+                 session: AsyncSession = Depends(get_session),
+                 current_user=Depends(get_current_user)):
+    questions = await session.execute(select(Question).where(Test.id == test_id).all())
 
 
 if __name__ == "__main__":
