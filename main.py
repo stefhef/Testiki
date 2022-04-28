@@ -5,11 +5,14 @@ import aiohttp as aiohttp
 import uvicorn as uvicorn
 from fastapi import FastAPI, Request, Depends, Form, Cookie
 from fastapi.responses import RedirectResponse
+from jose import jwt
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select, insert, func, update
 import asyncio
 from fastapi.templating import Jinja2Templates
+
+from config import SECRET_KEY, JWT_ALGORITHM
 from core.db import init_db, get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth_router
@@ -135,10 +138,15 @@ async def db_ks(request: Request,
     answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'dtht',
                                                                         'n_questions': int(data['questions']),
                                                                         'n_answers': int(data['answers'])})
+    st: str = 'авпвп'
+
     answ_and_quest.set_cookie('questions', data['questions'], httponly=True)
     answ_and_quest.set_cookie('answers', data['answers'], httponly=True)
-    answ_and_quest.set_cookie('test_name', data['test_name'], httponly=True)
-    answ_and_quest.set_cookie('about', data['about_test'], httponly=True)
+    answ_and_quest.set_cookie('test_name',
+                              jwt.encode({'test_name': data['test_name']}, SECRET_KEY, algorithm=JWT_ALGORITHM),
+                              httponly=True)
+    answ_and_quest.set_cookie('about', jwt.encode({'about': data['about_test']}, SECRET_KEY, algorithm=JWT_ALGORITHM),
+                              httponly=True)
     return answ_and_quest
 
 
@@ -160,18 +168,19 @@ async def obr(request: Request,
                                                                   'title': 'Не всё введено',
                                                                   'n_questions': questions,
                                                                   'n_answers': answers})
+    test_name = jwt.decode(test_name, SECRET_KEY, algorithms=[JWT_ALGORITHM]).get('test_name')
+    about = jwt.decode(about, SECRET_KEY, algorithms=[JWT_ALGORITHM]).get('about')
     test = Test(author=current_user.id,
                 test_name=test_name,
                 about=about,
                 created_date=datetime.datetime.now())
-
+    first = True
     for key, value in data.items():
-        old_question = 0
         if 'question' in key:
-            if int(key[8:]) > old_question:
+            if not first:
                 test.questions.append(question)
                 session.add(question)
-                old_question = int(key[8:])
+            first = False
             question = Question(question=value, id_author=current_user.id)
         elif 'answer' in key:
             answer = Answer(answer=value, is_true=False, id_author=current_user.id)
@@ -183,6 +192,8 @@ async def obr(request: Request,
             id_t = req.scalars().first()
             await session.execute(update(Answer).where(Answer.id == id_t).values(is_true=True))
 
+        test.questions.append(question)
+        session.add(question)
         session.add(test)
         await session.commit()
         await session.close()
