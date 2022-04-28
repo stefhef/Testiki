@@ -25,3 +25,7 @@ a.footer {
     align-items: center;
     justify-content: center
 }
+
+header {
+    padding: 10px;
+}
