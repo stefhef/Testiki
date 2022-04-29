@@ -1,13 +1,10 @@
 from typing import Optional
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi import APIRouter, status, HTTPException, Depends, Response, Request, Form, Cookie
+from fastapi import APIRouter, Depends, Response, Request
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import joinedload
-
-from test import Answer
 from user.auth import get_password_hash, verify_password, create_access_token_user, \
     get_current_user
 from core.db import get_session
@@ -31,8 +28,9 @@ class Token(BaseModel):
 
 @router.get("/logout")
 async def logout(response: Response):
-    response.delete_cookie("refresh_token")
-    return {"status": "Ok"}
+    response = RedirectResponse('/')
+    response.delete_cookie("access_token")
+    return response
 
 
 @router.get("/login", response_class=HTMLResponse)
@@ -61,7 +59,7 @@ async def login_p(request: Request,
 
     jwt_access_token = await create_access_token_user(user, session)
     result = templates.TemplateResponse('main.html',
-                                        context={'request': request, 'title': 'Вошли'})
+                                        context={'request': request, 'title': 'Вошли', 'current_user': user})
     result.set_cookie("access_token", jwt_access_token, httponly=True)
     return result
 
@@ -80,7 +78,7 @@ async def register_p(request: Request,
 
 @router.get("/lost_password")
 async def lost_password(request: Request,
-                     session: AsyncSession = Depends(get_session)):
+                        session: AsyncSession = Depends(get_session)):
     return templates.TemplateResponse("server_response.html", context={'request': request, 'title': 'Хехехе',
                                                                        'text': 'Ну сами виноваты',
                                                                        'status': 1})
@@ -109,4 +107,3 @@ async def register_p(request: Request,
     await session.commit()
     await session.close()
     return RedirectResponse('/auth/login')
-

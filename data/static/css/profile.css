@@ -1,0 +1,10 @@
+caption {
+    caption-side: top;
+    text-align: center;
+    font-size: 24px;
+    color: skyblue;
+}
+
+td {
+    text-align: center;
+}

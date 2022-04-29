@@ -92,3 +92,10 @@ async def create_access_token_user(user: User, session: AsyncSession) -> str:
     jwt_data = {"email": user.email}
     jwt_token = create_jwt_token(data=jwt_data, expires_delta=jwt_token_expires)
     return jwt_token
+
+
+async def user_availability(access_token, session: AsyncSession):
+    try:
+        return await get_current_user(access_token, session)
+    except HTTPException:
+        return None
