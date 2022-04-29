@@ -1,33 +1,30 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <link rel="stylesheet" type="text/css" href="/static/css/login.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/reg.css"/>
     <div class="container">
         <section id="content">
-            <h1>Регистрация</h1>
             <form action="" method="post">
-                <div class="flex p-4 m-6 justify-center">
-                    <input placeholder="Имя" id="name" name="name" type="left">
+                <h1>Регистрация</h1>
+                <div class="d-flex flex-row p-4 m-6 justify-center" id="about_user">
+                    <input placeholder="Имя" id="name" name="name" type="text" required style="margin: 3px">
+                    <input placeholder="Фамилия" id="surname" name="surname" type="text" required style="margin: 3px">
                 </div>
 
                 <div class="flex p-4 m-6 justify-center">
-                    <input placeholder="Фамилия" id="surname" name="surname" type="right">
+                    <input placeholder="Логин" id="login" name="login" type="text" required>
+                </div>
+
+                <div class="flex p-4 m-6 justify-center" >
+                    <input placeholder="Почта" id="email" name="email" type="email" required style="background: #eae7e7 url('/static/img/email-icon.png') no-repeat; background-position: 10px 10px !important">
                 </div>
 
                 <div class="flex p-4 m-6 justify-center">
-                    <input placeholder="Логин" id="username" name="username" type="left">
+                    <input placeholder="Пароль" id="password" name="hashed_password" type="password" required>
                 </div>
 
                 <div class="flex p-4 m-6 justify-center">
-                    <input placeholder="Почта" id="email" name="email" type="right">
-                </div>
-
-                <div class="flex p-4 m-6 justify-center">
-                    <input placeholder="Пароль" id="password" name="hashed_password">
-                </div>
-
-                <div class="flex p-4 m-6 justify-center">
-                    <input placeholder="Расскажите о себе" id="about" name="about">
+                    <input placeholder="Расскажите о себе" id="about" name="about" type="text">
                 </div>
 
                 <div>

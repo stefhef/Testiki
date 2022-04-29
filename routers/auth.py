@@ -44,8 +44,8 @@ async def login_p(request: Request,
                   session: AsyncSession = Depends(get_session)):
     """Обработчик входа"""
     data = await request.form()
-    if not all(data):
-        return templates.TemplateResponse('login.html', context={'request': request, 'title': 'Не всё введено'})
+    # if not all(data):
+    #     return templates.TemplateResponse('login.html', context={'request': request, 'title': 'Не всё введено'})
 
     user = await session.execute(select(User).where(User.username == data['login']))
     user = user.scalars().first()
@@ -88,9 +88,9 @@ async def lost_password(request: Request,
 async def register_p(request: Request,
                      session: AsyncSession = Depends(get_session)):
     data = await request.form()
-    if not all(data.values()):
-        return templates.TemplateResponse('register.html',
-                                          context={'request': request, 'title': 'Не все данные введены'})
+    # if not all(data.values()):
+    #     return templates.TemplateResponse('register.html',
+    #                                       context={'request': request, 'title': 'Не все данные введены'})
     res = await session.execute(select(User).where(User.email == data['email']))
     if res.scalars().first():
         return templates.TemplateResponse('register.html',
