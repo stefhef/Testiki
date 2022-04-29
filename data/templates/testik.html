@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form>
+    {% for key, value in questions_and_answers.items() %}
+    <p>{{ key + 1 }}. {{ value['question'] }}
+        {% for answer in value['answers'] %}
+        <br><input type="radio" class="answer" name="answer_to_question{{ answer }}"> {{ answer }}
+        {% endfor %}
+        {% endfor %}
+        <br></p>
+    <button type="submit" class="btn btn-primary">Готово!</button>
+</form>
+{% endblock %}

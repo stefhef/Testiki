@@ -99,7 +99,6 @@ async def p_complaint(request: Request,
 async def complaint(request: Request,
                     current_user=Depends(get_current_user),
                     session: AsyncSession = Depends(get_session)):
-    user = await user_availability(request.cookies.get('access_token', None), session)
     async with aiohttp.ClientSession() as session_h:
         async with session_h.get("https://evilinsult.com/generate_insult.php?lang=ru&type=json") as resp:
             json = await resp.json()
@@ -129,18 +128,13 @@ async def db_ks(request: Request,
 async def db_ks(request: Request,
                 session: AsyncSession = Depends(get_session),
                 current_user=Depends(get_current_user)):
-    user = await user_availability(request.cookies.get('access_token', None), session)
     data = await request.form()
     if not all(data.values()):
-        return templates.TemplateResponse('test_f.html', context={'request': request,
-                                                                  'title': 'Ай-ай-ай',
-                                                                  'current_user': user})
-
-    answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request,
-                                                                        'title': 'Создание теста',
+        return templates.TemplateResponse('test_f.html', context={'request': request, 'title': 'Ай-ай-ай'})
+    answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'dtht',
                                                                         'n_questions': int(data['questions']),
-                                                                        'n_answers': int(data['answers']),
-                                                                        'current_user': user})
+                                                                        'n_answers': int(data['answers'])})
+    st: str = 'авпвп'
 
     answ_and_quest.set_cookie('questions', data['questions'], httponly=True)
     answ_and_quest.set_cookie('answers', data['answers'], httponly=True)
@@ -218,12 +212,54 @@ async def testik(test_id: int,
                  request: Request,
                  session: AsyncSession = Depends(get_session),
                  current_user=Depends(get_current_user)):
-    req = await session.execute(select(Question).join(questions_to_test).join(Test).where(Test.id == test_id))
+    user = await user_availability(request.cookies.get('access_token', None), session)
+    testik = await session.execute(select(Test).where(Test.id == test_id))
+    testik = testik.scalars().first()
+    questions_and_answers = {}
+    q = await session.execute(select(Question).join(questions_to_test).join(Test).where(Test.id == test_id))
+    q = q.scalars().all()
+    for i in range(len(q)):
+        new_dict = {'question': q[i].question,
+                    'answers': []}
+        q_id = q[i].id
+        a = await session.execute(select(Answer).join(answers_to_question).join(Question).where(Question.id == q_id))
+        a = a.scalars().all()
+        for el in a:
+            new_dict['answers'].append(el.answer)
+        questions_and_answers[i] = new_dict
 
-    data = req.all()
+    response = templates.TemplateResponse("testik.html", context={"request": request,
+                                                                  "title": 'ТЕСТИК!!!',
+                                                                  'name_test': testik.test_name,
+                                                                  'about': testik.about,
+                                                                  'questions_and_answers': questions_and_answers,
+                                                                  'current_user': user})
+    return response
 
-    return data[0].question()
 
+@app.post('testik/{test_id}')
+async def result_testik(test_id: int,
+                        request: Request,
+                        session: AsyncSession = Depends(get_session),
+                        current_user=Depends(get_current_user)):
+    user = await user_availability(request.cookies.get('access_token', None), session)
+    testik = await session.execute(select(Test).where(Test.id == test_id))
+    testik = testik.scalars().first()
+    questions_and_answers = {}
+    q = await session.execute(
+        select(Question).join(questions_to_test).join(Test).where(Test.id == test_id))
+    q = q.scalars().all()
+    for i in range(len(q)):
+        new_dict = {'question': q[i].question,
+                    'answers': []}
+        q_id = q[i].id
+        a = await session.execute(
+            select(Answer).join(answers_to_question).join(Question).where(Question.id == q_id))
+        a = a.scalars().all()
+        for el in a:
+            new_dict['answers'].append(el.answer)
+        questions_and_answers[i] = new_dict
+    '''продолжение завтра'''
 
 if __name__ == "__main__":
     uvicorn.run('main:app', log_level="info", reload=True)
