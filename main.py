@@ -212,6 +212,7 @@ async def testik(test_id: int,
                  request: Request,
                  session: AsyncSession = Depends(get_session),
                  current_user=Depends(get_current_user)):
+    user = await user_availability(request.cookies.get('access_token', None), session)
     testik = await session.execute(select(Test).where(Test.id == test_id))
     testik = testik.scalars().first()
     questions_and_answers = {}
@@ -227,24 +228,38 @@ async def testik(test_id: int,
             new_dict['answers'].append(el.answer)
         questions_and_answers[i] = new_dict
 
-    """"answers, questions = [], []
-    q = q.scalars().all()
-    for i in range(len(q)):
-        q_id = q[i].id
-        q_text = q[i].question
-        a = await session.execute(select(Answer).join(answers_to_question).join(Question).where(Question.id == q_id))
-        a = a.scalars().all()
-        for el in a:
-            answers.append(el.answer)
-        questions.append(q_text)"""
-
     response = templates.TemplateResponse("testik.html", context={"request": request,
                                                                   "title": 'ТЕСТИК!!!',
                                                                   'name_test': testik.test_name,
                                                                   'about': testik.about,
-                                                                  'questions_and_answers': questions_and_answers})
+                                                                  'questions_and_answers': questions_and_answers,
+                                                                  'current_user': user})
     return response
 
+
+@app.post('testik/{test_id}')
+async def result_testik(test_id: int,
+                        request: Request,
+                        session: AsyncSession = Depends(get_session),
+                        current_user=Depends(get_current_user)):
+    user = await user_availability(request.cookies.get('access_token', None), session)
+    testik = await session.execute(select(Test).where(Test.id == test_id))
+    testik = testik.scalars().first()
+    questions_and_answers = {}
+    q = await session.execute(
+        select(Question).join(questions_to_test).join(Test).where(Test.id == test_id))
+    q = q.scalars().all()
+    for i in range(len(q)):
+        new_dict = {'question': q[i].question,
+                    'answers': []}
+        q_id = q[i].id
+        a = await session.execute(
+            select(Answer).join(answers_to_question).join(Question).where(Question.id == q_id))
+        a = a.scalars().all()
+        for el in a:
+            new_dict['answers'].append(el.answer)
+        questions_and_answers[i] = new_dict
+    '''продолжение завтра'''
 
 if __name__ == "__main__":
     uvicorn.run('main:app', log_level="info", reload=True)

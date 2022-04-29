@@ -4,7 +4,7 @@
 <form action="/obr" method="post">
     {% for question in range(n_questions) %}
     <p><input type="text" class="form-control" placeholder="Введите вопрсик" name="question{{ question }}">
-        введите ответики и отметьте какой из них правильный:
+        Введите ответики и отметьте какой из них правильный:
         {% for answer in range(n_answers) %}
         <br><input type="text" class="answer" name="answer{{ question }}{{ answer }}">
         <input type="radio" name="is_true{{ question }}" value="{{ question }}{{ answer }}"/>
