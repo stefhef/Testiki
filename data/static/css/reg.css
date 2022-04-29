@@ -1,6 +1,48 @@
-h1 {
-    color: #000080;
-    text-align: center
+h1, h2, h3, h4, h5, h6 {
+    color: #563D64;
+}
+
+small {
+    font-size: 10px;
+}
+
+b, strong {
+    font-weight: bold;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
+.alignleft {
+    float: left;
+    margin-right: 15px;
+}
+
+.alignright {
+    float: right;
+    margin-left: 15px;
+}
+
+.clearfix:after,
+form:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
 }
 
 .container {
@@ -105,7 +147,6 @@ h1 {
     z-index: -2;
 }
 
-
 #content form {
     margin: 0 20px;
     position: relative
@@ -149,9 +190,6 @@ h1 {
     background-color: #fff;
     border: 1px solid #ed1c24;
     outline: none;
-}
-
-#email {;
 }
 
 #username, #name, #surname, #about, #login {
@@ -200,7 +238,6 @@ h1 {
     background: linear-gradient(top, rgba(30, 144, 255, 1) 0%, rgba(135, 206, 250, 1) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#1e90ff', endColorstr='#1e90ff', GradientType=0);
 }
-
 
 #content form div a {
     color: #004a80;
