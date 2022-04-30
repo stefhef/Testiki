@@ -1,4 +1,6 @@
+import base64
 import datetime
+import io
 from typing import Optional
 import aiohttp as aiohttp
 import uvicorn as uvicorn
@@ -15,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth_router, user_router
 from test import Question, Test, Answer, questions_to_test, answers_to_question
 from user import get_current_user, user_availability, User
+import PIL.Image as Image
 
 app = FastAPI()
 app.include_router(auth_router)
@@ -139,16 +142,18 @@ async def db_ks(request: Request,
 async def db_ks(request: Request,
                 session: AsyncSession = Depends(get_session),
                 current_user=Depends(get_current_user)):
+    user = await user_availability(request.cookies.get('access_token', None), session)
     data = await request.form()
     if not all(data.values()):
         return templates.TemplateResponse('test_f.html',
                                           context={'request': request, 'title': 'Ай-ай-ай'})
     answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request,
-                                                                        'title': 'dtht',
+                                                                        'title': 'Создание тестиков',
                                                                         'n_questions': int(
                                                                             data['questions']),
                                                                         'n_answers': int(
-                                                                            data['answers'])})
+                                                                            data['answers']),
+                                                                        "current_user": user})
 
     answ_and_quest.set_cookie('questions', data['questions'], httponly=True)
     answ_and_quest.set_cookie('answers', data['answers'], httponly=True)
@@ -262,14 +267,14 @@ async def testik(test_id: int,
         for el in a:
             new_dict['answers'].append(el.answer)
         questions_and_answers[i] = new_dict
-
+    image = str(base64.b64encode(testik.image))[2:-1]
     response = templates.TemplateResponse("testik.html", context={"request": request,
                                                                   "title": 'ТЕСТИК!!!',
                                                                   'test_name': testik.test_name,
                                                                   'about_test': testik.about,
                                                                   'author': author_of_test,
                                                                   'date': testik.created_date,
-                                                                  'img': testik.image,
+                                                                  'img': image,
                                                                   'questions_and_answers': questions_and_answers,
                                                                   'current_user': user,
                                                                   'test_id': test_id})
@@ -309,6 +314,7 @@ async def result_testik(test_id: int,
     true_answers = list(filter(lambda x: x[1] is True, all_answers))
 
     data = await request.form()
+    image = str(base64.b64encode(testik.image))[2:-1]
     user_answers = []
     for key, value in data.items():
         if 'answer' in key:
@@ -335,7 +341,7 @@ async def result_testik(test_id: int,
                                                                              'about_test': testik.about,
                                                                              'author': author_of_test,
                                                                              'date': testik.created_date,
-                                                                             'img': None,
+                                                                             'img': image,
                                                                              'questions_and_answers': questions_and_answers,
                                                                              'current_user': user,
                                                                              'test_id': test_id,
@@ -347,7 +353,7 @@ async def result_testik(test_id: int,
                                                                       'about_test': testik.about,
                                                                       'author': author_of_test,
                                                                       'date': testik.created_date,
-                                                                      'img': None,
+                                                                      'img': image,
                                                                       'questions_and_answers': questions_and_answers,
                                                                       'current_user': user,
                                                                       'test_id': test_id})

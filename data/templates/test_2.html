@@ -3,7 +3,7 @@
 {% block content %}
 <form action="/obr" method="post" enctype="multipart/form-data">
     {% for question in range(n_questions) %}
-    <p><input type="text" class="form-control" placeholder="Введите вопрсик"
+    <p><input type="text" class="form-control" placeholder="Введите вопросик"
               name="question{{ question }}">
         Введите ответики и отметьте какой из них правильный:
         {% for answer in range(n_answers) %}
