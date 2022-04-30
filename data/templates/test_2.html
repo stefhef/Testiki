@@ -3,7 +3,8 @@
 {% block content %}
 <form action="/obr" method="post">
     {% for question in range(n_questions) %}
-    <p><input type="text" class="form-control" placeholder="Введите вопрсик" name="question{{ question }}">
+    <p><input type="text" class="form-control" placeholder="Введите вопрсик"
+              name="question{{ question }}">
         Введите ответики и отметьте какой из них правильный:
         {% for answer in range(n_answers) %}
         <br><input type="text" class="answer" name="answer{{ question }}{{ answer }}">
@@ -11,6 +12,10 @@
         {% endfor %}
         {% endfor %}
         <br></p>
+    <div class="form-group">
+        <label for="photo">Приложите фотографию</label>
+        <input type="file" class="form-control-file" id="photo" name="file">
+    </div>
     <button type="submit" class="btn btn-primary">Завершить</button>
 </form>
 {% endblock %}

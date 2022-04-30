@@ -190,7 +190,8 @@ async def obr(request: Request,
                 test_name=test_name,
                 about=about,
                 created_date=datetime.datetime.strptime(
-                    datetime.datetime.now().strftime("%d:%m:%Y %H:%M"), "%d:%m:%Y %H:%M"))
+                    datetime.datetime.now().strftime("%d:%m:%Y %H:%M"), "%d:%m:%Y %H:%M"),
+                image=None)
 
     first = True
     is_t_count = 0
@@ -211,6 +212,11 @@ async def obr(request: Request,
                                         .where(Answer.id_author == current_user.id))
             id_t = req.scalars().first()
             await session.execute(update(Answer).where(Answer.id == id_t).values(is_true=True))
+
+        f = data['file']
+        with open(f, 'rb') as file:
+            blob_data = file.read()
+        test.image = blob_data
 
     if questions != is_t_count:
         return templates.TemplateResponse('test_2.html', context={'request': request,
@@ -264,7 +270,7 @@ async def testik(test_id: int,
                                                                   'about_test': testik.about,
                                                                   'author': author_of_test,
                                                                   'date': testik.created_date,
-                                                                  'img': None,
+                                                                  'img': testik.image,
                                                                   'questions_and_answers': questions_and_answers,
                                                                   'current_user': user,
                                                                   'test_id': test_id})
