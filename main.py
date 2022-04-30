@@ -238,7 +238,7 @@ async def testik(test_id: int,
     return response
 
 
-@app.post('testik/{test_id}/result')
+@app.post('testik/{test_id}')
 async def result_testik(test_id: int,
                         request: Request,
                         session: AsyncSession = Depends(get_session),
