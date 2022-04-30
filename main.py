@@ -37,28 +37,32 @@ async def http_exception_handler(request,
     sess = await session.__anext__()
     user = await user_availability(request.cookies.get('access_token', None), sess)
     if exc.status_code == 401:
-        return templates.TemplateResponse('server_response.html', {"request": request, "title": exc.status_code,
-                                                                   'text': f"Не авторизованы ай-ай",
-                                                                   'status': 0,
-                                                                   'current_user': user})
+        return templates.TemplateResponse('server_response.html',
+                                          {"request": request, "title": exc.status_code,
+                                           'text': f"Не авторизованы ай-ай",
+                                           'status': 0,
+                                           'current_user': user})
     elif exc.status_code == 404:
-        return templates.TemplateResponse('server_response.html', {"request": request, "title": exc.status_code,
-                                                                   'text': f"Страница не найдена((",
-                                                                   'status': 0,
-                                                                   'current_user': user})
+        return templates.TemplateResponse('server_response.html',
+                                          {"request": request, "title": exc.status_code,
+                                           'text': f"Страница не найдена((",
+                                           'status': 0,
+                                           'current_user': user})
     else:
-        return templates.TemplateResponse('server_response.html', {"request": request, "title": exc.status_code,
-                                                                   'text': f"Ошибочка(("
-                                                                           f"{exc.status_code}",
-                                                                   'status': 0,
-                                                                   'current_user': user})
+        return templates.TemplateResponse('server_response.html',
+                                          {"request": request, "title": exc.status_code,
+                                           'text': f"Ошибочка(("
+                                                   f"{exc.status_code}",
+                                           'status': 0,
+                                           'current_user': user})
 
 
 @app.get("/about")
 async def say_hello(request: Request,
                     session: AsyncSession = Depends(get_session)):
     user = await user_availability(request.cookies.get('access_token', None), session)
-    return templates.TemplateResponse("about.html", {"request": request, "title": 'О нас', 'current_user': user})
+    return templates.TemplateResponse("about.html",
+                                      {"request": request, "title": 'О нас', 'current_user': user})
 
 
 @app.get("/")
@@ -66,14 +70,16 @@ async def root(request: Request,
                session: AsyncSession = Depends(get_session)):
     user = await user_availability(request.cookies.get('access_token', None), session)
     return templates.TemplateResponse("main.html",
-                                      {"request": request, "title": 'Главная страница', 'current_user': user})
+                                      {"request": request, "title": 'Главная страница',
+                                       'current_user': user})
 
 
 @app.get("/complaint")
 async def complaint(request: Request,
                     session: AsyncSession = Depends(get_session)):
     user = await user_availability(request.cookies.get('access_token', None), session)
-    return templates.TemplateResponse("complaint.html", {"request": request, "title": 'Жалоба(', 'current_user': user})
+    return templates.TemplateResponse("complaint.html", {"request": request, "title": 'Жалоба(',
+                                                         'current_user': user})
 
 
 @app.post("/complaint")
@@ -82,32 +88,37 @@ async def p_complaint(request: Request,
     user = await user_availability(request.cookies.get('access_token', None), session)
     data = await request.form()
     if not data.get('text', None):
-        return templates.TemplateResponse("server_response.html", {"request": request, "title": 'Сообщение сервера',
-                                                                   "status": 0, "text": "Не все данные введены",
-                                                                   'current_user': user})
+        return templates.TemplateResponse("server_response.html",
+                                          {"request": request, "title": 'Сообщение сервера',
+                                           "status": 0, "text": "Не все данные введены",
+                                           'current_user': user})
     query = await session.execute(select(User).where(User.is_admin == True, User.vk_id != None))
     users = query.scalars().all()
     users_ids = list(map(lambda x: x.vk_id, users))
     if users_ids:
         asyncio.create_task(vk_send_message(f"Пожаловались: {data.get('text', None)}", users_ids))
-    return templates.TemplateResponse("server_response.html", {"request": request, "title": 'Сообщение сервера',
-                                                               "status": 1, "text": "Ваша жалоба принята",
-                                                               'current_user': user})
+    return templates.TemplateResponse("server_response.html",
+                                      {"request": request, "title": 'Сообщение сервера',
+                                       "status": 1, "text": "Ваша жалоба принята",
+                                       'current_user': user})
 
 
 @app.get("/insult")
 async def complaint(request: Request,
                     current_user=Depends(get_current_user),
                     session: AsyncSession = Depends(get_session)):
+    user = await user_availability(request.cookies.get('access_token', None), session)
     async with aiohttp.ClientSession() as session_h:
-        async with session_h.get("https://evilinsult.com/generate_insult.php?lang=ru&type=json") as resp:
+        async with session_h.get(
+                "https://evilinsult.com/generate_insult.php?lang=ru&type=json") as resp:
             json = await resp.json()
             text = json["insult"]
         query = await session.execute(select(User).where(User.is_admin == True, User.vk_id != None))
         users = query.scalars().all()
         users_ids = list(map(lambda x: x.vk_id, users))
     if users_ids:
-        asyncio.create_task(vk_send_message(f"{current_user.username} обзывается(( {text}", users_ids))
+        asyncio.create_task(
+            vk_send_message(f"{current_user.username} обзывается(( {text}", users_ids))
     return templates.TemplateResponse("server_response.html", {"request": request,
                                                                "title": 'Сообщение сервера',
                                                                "status": 1,
@@ -130,19 +141,23 @@ async def db_ks(request: Request,
                 current_user=Depends(get_current_user)):
     data = await request.form()
     if not all(data.values()):
-        return templates.TemplateResponse('test_f.html', context={'request': request, 'title': 'Ай-ай-ай'})
+        return templates.TemplateResponse('test_f.html',
+                                          context={'request': request, 'title': 'Ай-ай-ай'})
     answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request,
                                                                         'title': 'dtht',
-                                                                        'n_questions': int(data['questions']),
-                                                                        'n_answers': int(data['answers'])})
-    st: str = 'авпвп'
+                                                                        'n_questions': int(
+                                                                            data['questions']),
+                                                                        'n_answers': int(
+                                                                            data['answers'])})
 
     answ_and_quest.set_cookie('questions', data['questions'], httponly=True)
     answ_and_quest.set_cookie('answers', data['answers'], httponly=True)
     answ_and_quest.set_cookie('test_name',
-                              jwt.encode({'test_name': data['test_name']}, SECRET_KEY, algorithm=JWT_ALGORITHM),
+                              jwt.encode({'test_name': data['test_name']}, SECRET_KEY,
+                                         algorithm=JWT_ALGORITHM),
                               httponly=True)
-    answ_and_quest.set_cookie('about', jwt.encode({'about': data['about_test']}, SECRET_KEY, algorithm=JWT_ALGORITHM),
+    answ_and_quest.set_cookie('about', jwt.encode({'about': data['about_test']}, SECRET_KEY,
+                                                  algorithm=JWT_ALGORITHM),
                               httponly=True)
     return answ_and_quest
 
@@ -174,9 +189,11 @@ async def obr(request: Request,
     test = Test(author=current_user.id,
                 test_name=test_name,
                 about=about,
-                created_date=datetime.datetime.strptime(datetime.datetime.now().strftime("%d:%m:%Y %H:%M"), "%d:%m:%Y %H:%M"))
+                created_date=datetime.datetime.strptime(
+                    datetime.datetime.now().strftime("%d:%m:%Y %H:%M"), "%d:%m:%Y %H:%M"))
 
     first = True
+    is_t_count = 0
     for key, value in data.items():
         if 'question' in key:
             if not first:
@@ -189,10 +206,18 @@ async def obr(request: Request,
             question.answers.append(answer)
             session.add(answer)
         elif 'is_true' in key:
+            is_t_count += 1
             req = await session.execute(select(func.max(Answer.id))
                                         .where(Answer.id_author == current_user.id))
             id_t = req.scalars().first()
             await session.execute(update(Answer).where(Answer.id == id_t).values(is_true=True))
+
+    if questions != is_t_count:
+        return templates.TemplateResponse('test_2.html', context={'request': request,
+                                                                  'title': 'Не всё введено',
+                                                                  'n_questions': questions,
+                                                                  'n_answers': answers,
+                                                                  'current_user': user})
 
     test.questions.append(question)
     session.add(question)
@@ -216,14 +241,18 @@ async def testik(test_id: int,
     user = await user_availability(request.cookies.get('access_token', None), session)
     testik = await session.execute(select(Test).where(Test.id == test_id))
     testik = testik.scalars().first()
+    author_of_test = await session.execute(select(User.username).where(User.id == testik.author))
+    author_of_test = author_of_test.scalars().first()
     questions_and_answers = {}
-    q = await session.execute(select(Question).join(questions_to_test).join(Test).where(Test.id == test_id))
+    q = await session.execute(
+        select(Question).join(questions_to_test).join(Test).where(Test.id == test_id))
     q = q.scalars().all()
     for i in range(len(q)):
         new_dict = {'question': q[i].question,
                     'answers': []}
         q_id = q[i].id
-        a = await session.execute(select(Answer).join(answers_to_question).join(Question).where(Question.id == q_id))
+        a = await session.execute(
+            select(Answer).join(answers_to_question).join(Question).where(Question.id == q_id))
         a = a.scalars().all()
         for el in a:
             new_dict['answers'].append(el.answer)
@@ -231,14 +260,18 @@ async def testik(test_id: int,
 
     response = templates.TemplateResponse("testik.html", context={"request": request,
                                                                   "title": 'ТЕСТИК!!!',
-                                                                  'name_test': testik.test_name,
-                                                                  'about': testik.about,
+                                                                  'test_name': testik.test_name,
+                                                                  'about_test': testik.about,
+                                                                  'author': author_of_test,
+                                                                  'date': testik.created_date,
+                                                                  'img': None,
                                                                   'questions_and_answers': questions_and_answers,
-                                                                  'current_user': user})
+                                                                  'current_user': user,
+                                                                  'test_id': test_id})
     return response
 
 
-@app.post('testik/{test_id}')
+@app.post('/testik/{test_id}')
 async def result_testik(test_id: int,
                         request: Request,
                         session: AsyncSession = Depends(get_session),
@@ -253,21 +286,68 @@ async def result_testik(test_id: int,
     q = q.scalars().all()
 
     all_answers = []
+    questions_and_answers = {}
+    author_of_test = await session.execute(select(User.username).where(User.id == testik.author))
+    author_of_test = author_of_test.scalars().first()
     for i in range(len(q)):
+        new_dict = {'question': q[i].question,
+                    'answers': []}
         q_id = q[i].id
         a = await session.execute(
             select(Answer).join(answers_to_question).join(Question).where(Question.id == q_id))
         a = a.scalars().all()
         for el in a:
             all_answers.append((el.answer, el.is_true))
+            new_dict['answers'].append((el.answer, el.is_true))
+        questions_and_answers[i] = new_dict
 
     true_answers = list(filter(lambda x: x[1] is True, all_answers))
 
     data = await request.form()
+    user_answers = []
     for key, value in data.items():
         if 'answer' in key:
-            print('!!!!!!!!!')
-    return data
+            user_answers.append(value)
+    for key, value in questions_and_answers.items():
+        for n, elem in enumerate(value['answers']):
+            for element in user_answers:
+                print('!!!', elem[0], element)
+                if elem[0] == element:
+                    questions_and_answers[key]['answers'][n] = (elem[0], elem[1], True)
+                    break
+                else:
+                    questions_and_answers[key]['answers'][n] = (elem[0], elem[1], False)
+    print(questions_and_answers)
+    count = 0
+    if len(true_answers) == len(user_answers):
+        for true_a, user_a in zip(true_answers, user_answers):
+            if true_a[0] == user_a:
+                count += 1
+
+        response = templates.TemplateResponse("testik_result.html", context={"request": request,
+                                                                             "title": 'ТЕСТИК!!! Результатики)',
+                                                                             'test_name': testik.test_name,
+                                                                             'about_test': testik.about,
+                                                                             'author': author_of_test,
+                                                                             'date': testik.created_date,
+                                                                             'img': None,
+                                                                             'questions_and_answers': questions_and_answers,
+                                                                             'current_user': user,
+                                                                             'test_id': test_id,
+                                                                             'end': f'Правильных ответов {count}/{len(true_answers)}, вы справились с тестом на {round(count / len(true_answers) * 100, 2)}%'})
+    else:
+        response = templates.TemplateResponse("testik.html", context={"request": request,
+                                                                      "title": 'ТЕСТИК!!! Вы ответили не на все вопросики(',
+                                                                      'test_name': testik.test_name,
+                                                                      'about_test': testik.about,
+                                                                      'author': author_of_test,
+                                                                      'date': testik.created_date,
+                                                                      'img': None,
+                                                                      'questions_and_answers': questions_and_answers,
+                                                                      'current_user': user,
+                                                                      'test_id': test_id})
+    return response
+
 
 if __name__ == "__main__":
     uvicorn.run('main:app', log_level="info", reload=True)

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ test_name }}</h1>
+<h4>{{ about_test }}</h4>
+<img src="{{ img }}">
+<h4>Автор теста: {{ author }}</h4>
+<h4>Тест создан: {{ date }}</h4>
+<form action="/testik/{{ test_id }}" method="post">
+    {% for key, value in questions_and_answers.items() %}
+    <div>{{ key + 1 }}. {{ value['question'] }}
+        {% for answer, is_true, is_user_answer in value['answers'] %}
+        {% if is_true and is_user_answer %}
+        <br><input type="radio" class="answer"
+               name="answer{{ key }}"
+               checked> {{ answer }} &#10004;
+
+        {% else %}
+        {% if is_user_answer and not is_true %}
+        <br><input type="radio" class="answer"
+               name="answer{{ key }}"
+               checked> {{ answer }} &#10008;
+
+        {% else %}
+        <br><input type="radio" class="answer" name="answer{{ key }}"> {{ answer }}
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+        <br></div><br>
+    {% endfor %}
+</form>
+<br> {{ end }}
+{% endblock %}

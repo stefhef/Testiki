@@ -29,6 +29,7 @@ class Test(Base):
     questions = orm.relation("Question",
                              secondary='questions_to_test',
                              backref="tests")
+    # image = sqlalchemy.Column(sqlalchemy.BLOB, nullable=False)
 
     def __repr__(self):
         return f"ID:{self.id}\tНазвание теста: {self.test_name}\tПро тест:{self.about}\tID автора: {self.author}\tВремя создания: {self.created_date}"
