@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form action="/obr" method="post">
+<form action="/obr" method="post" enctype="multipart/form-data">
     {% for question in range(n_questions) %}
     <p><input type="text" class="form-control" placeholder="Введите вопрсик"
               name="question{{ question }}">

@@ -2,7 +2,7 @@ import datetime
 from typing import Optional
 import aiohttp as aiohttp
 import uvicorn as uvicorn
-from fastapi import FastAPI, Request, Depends, Cookie
+from fastapi import FastAPI, Request, Depends, Cookie, UploadFile
 from jose import jwt
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
@@ -177,6 +177,8 @@ async def obr(request: Request,
                                                                            'status': 0,
                                                                            'current_user': user})
     data = await request.form()
+    a = await data["file"].read()
+
     if not all(data.values()):
         return templates.TemplateResponse('test_2.html', context={'request': request,
                                                                   'title': 'Не всё введено',
@@ -191,7 +193,7 @@ async def obr(request: Request,
                 about=about,
                 created_date=datetime.datetime.strptime(
                     datetime.datetime.now().strftime("%d:%m:%Y %H:%M"), "%d:%m:%Y %H:%M"),
-                image=None)
+                image=a)
 
     first = True
     is_t_count = 0
@@ -213,10 +215,7 @@ async def obr(request: Request,
             id_t = req.scalars().first()
             await session.execute(update(Answer).where(Answer.id == id_t).values(is_true=True))
 
-        f = data['file']
-        with open(f, 'rb') as file:
-            blob_data = file.read()
-        test.image = blob_data
+        print(a)
 
     if questions != is_t_count:
         return templates.TemplateResponse('test_2.html', context={'request': request,
