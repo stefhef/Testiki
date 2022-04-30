@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form>
+<form action="/testik/{test_id}" method="post">
     {% for key, value in questions_and_answers.items() %}
     <p>{{ key + 1 }}. {{ value['question'] }}
         {% for answer in value['answers'] %}
-        <br><input type="radio" class="answer" name="answer_to_question{{ answer }}"> {{ answer }}
+        <br><input type="radio" class="answer" name="answer{{ key }}" value="{{ answer }}"> {{ answer }}
         {% endfor %}
         {% endfor %}
         <br></p>

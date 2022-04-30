@@ -131,7 +131,8 @@ async def db_ks(request: Request,
     data = await request.form()
     if not all(data.values()):
         return templates.TemplateResponse('test_f.html', context={'request': request, 'title': 'Ай-ай-ай'})
-    answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request, 'title': 'dtht',
+    answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request,
+                                                                        'title': 'dtht',
                                                                         'n_questions': int(data['questions']),
                                                                         'n_answers': int(data['answers'])})
     st: str = 'авпвп'
@@ -237,29 +238,36 @@ async def testik(test_id: int,
     return response
 
 
-@app.post('testik/{test_id}')
+@app.post('testik/{test_id}/result')
 async def result_testik(test_id: int,
                         request: Request,
                         session: AsyncSession = Depends(get_session),
                         current_user=Depends(get_current_user)):
     user = await user_availability(request.cookies.get('access_token', None), session)
+
     testik = await session.execute(select(Test).where(Test.id == test_id))
     testik = testik.scalars().first()
-    questions_and_answers = {}
+
     q = await session.execute(
         select(Question).join(questions_to_test).join(Test).where(Test.id == test_id))
     q = q.scalars().all()
+
+    all_answers = []
     for i in range(len(q)):
-        new_dict = {'question': q[i].question,
-                    'answers': []}
         q_id = q[i].id
         a = await session.execute(
             select(Answer).join(answers_to_question).join(Question).where(Question.id == q_id))
         a = a.scalars().all()
         for el in a:
-            new_dict['answers'].append(el.answer)
-        questions_and_answers[i] = new_dict
-    '''продолжение завтра'''
+            all_answers.append((el.answer, el.is_true))
+
+    true_answers = list(filter(lambda x: x[1] is True, all_answers))
+
+    data = await request.form()
+    for key, value in data.items():
+        if 'answer' in key:
+            print('!!!!!!!!!')
+    return data
 
 if __name__ == "__main__":
     uvicorn.run('main:app', log_level="info", reload=True)
