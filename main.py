@@ -270,9 +270,7 @@ async def testik(test_id: int,
         for el in a:
             new_dict['answers'].append(el.answer)
         questions_and_answers[i] = new_dict
-    image = str(base64.b64encode(testik.image))[2:-1]
     image = str(testik.image)[2:-1]
-    print(image)
     response = templates.TemplateResponse("testik.html", context={"request": request,
                                                                   "title": 'ТЕСТИК!!!',
                                                                   'test_name': testik.test_name,
@@ -319,8 +317,8 @@ async def result_testik(test_id: int,
     true_answers = list(filter(lambda x: x[1] is True, all_answers))
 
     data = await request.form()
-    image = str(base64.b64encode(testik.image))[2:-1]
-    print('!!!!', image)
+    image = str(testik.image)[2:-1]
+
     user_answers = []
     for key, value in data.items():
         if 'answer' in key:
