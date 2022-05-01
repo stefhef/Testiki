@@ -1,18 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% if error %}
-        <p class="alert alert-danger">{{ error }}</p>
-    {% endif %}
-    <form action="/obr" method="post" enctype="multipart/form-data">
-        {% for question in range(n_questions) %}
-            <p><input type="text" class="form-control" placeholder="Введите вопросик"
-                      name="question{{ question }}" required>
-            Введите ответики и отметьте какой из них правильный:
-            {% for answer in range(n_answers) %}
-                <br><input type="text" class="answer" name="answer{{ question }}{{ answer }}" required>
-                <input type="radio" name="is_true{{ question }}" value="{{ question }}{{ answer }}"/>
-            {% endfor %}
+<form action="/obr" method="post" enctype="multipart/form-data">
+    {% for question in range(n_questions) %}
+    <p><input type="text" class="form-control" placeholder="Введите вопросик"
+              name="question{{ question }}">
+        Введите ответики и отметьте какой из них правильный:
+        {% for answer in range(n_answers) %}
+        <br><input type="text" class="answer" name="answer{{ question }}{{ answer }}">
+        <input type="radio" name="is_true{{ question }}" value="{{ question }}{{ answer }}"/>
+        {% endfor %}
         {% endfor %}
         <br></p>
         <div class="form-group">
