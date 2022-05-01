@@ -1,18 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 align="middle">dsgr</h1>
-<div>
-    <form class="login_form" method="post">
-        <input type="text" class="form-control" id="test_name" aria-describedby="questionsHelp"
-               placeholder="Название тестика" name="test_name">
-        <input type="text" class="form-control" id="about_test" aria-describedby="questionsHelp"
-               placeholder="О тестике" name="about_test">
-        <input type="text" class="form-control" id="questions" aria-describedby="questionsHelp"
-               placeholder="Введите количество вопросиков" name="questions">
-        <input type="text" class="form-control" id="answers" aria-describedby="answersHelp"
-               placeholder="Введите количество ответиков на вопрсик" name="answers">
-        <button type="submit" class="btn btn-primary">Далее</button>
-    </form>
-</div>
+    {% if error %}
+        <p class="alert alert-danger">{{ error }}</p>
+    {% endif %}
+    <h1 align="middle">Создание тестика</h1>
+    <div>
+        <form class="login_form" method="post">
+            <input type="text" class="form-control" id="test_name" aria-describedby="questionsHelp"
+                   placeholder="Название тестика" name="test_name" required>
+            <input type="text" class="form-control" id="about_test" aria-describedby="questionsHelp"
+                   placeholder="О тестике" name="about_test" required>
+            <input type="text" class="form-control" id="questions" aria-describedby="questionsHelp"
+                   placeholder="Введите количество вопросиков" name="questions" required>
+            <input type="text" class="form-control" id="answers" aria-describedby="answersHelp"
+                   placeholder="Введите количество ответиков на вопрсик" name="answers" required>
+            <button type="submit" class="btn btn-primary">Далее</button>
+        </form>
+    </div>
 {% endblock %}

@@ -1,5 +1,6 @@
 from logging.config import fileConfig
 from user.models import User
+from test.models import Test, Question, Answer, questions_to_test, answers_to_question
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from core.db import Base
@@ -39,6 +40,7 @@ def run_migrations_offline():
 
     """
     url = config.get_main_option("sqlalchemy.url")
+    print(url)
     context.configure(
         url=url,
         target_metadata=target_metadata,

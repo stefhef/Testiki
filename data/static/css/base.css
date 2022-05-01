@@ -1,16 +1,16 @@
 main {
-  min-height: calc(100vh - 30px - 18px);
+    min-height: calc(100vh - 141px);
 }
 
 footer {
-  height: 30px;
+    height: 30px;
 }
 
 p.footer {
     text-align: center;
     border-top-left-radius: 50%;
     border-top-right-radius: 50%;
-    background-color: rgba(138,150,196,0.58);
+    background-color: rgba(138, 150, 196, 0.58);
     width: auto;
     font-size: 10px;
 }
@@ -24,6 +24,21 @@ a.footer {
     display: flex;
     align-items: center;
     justify-content: center
+}
+
+.colord {
+    background-color: #54acde;
+    color: #ffffff;
+}
+
+.colord-hover {
+    width: 200px;
+    border-color: #54acde;
+}
+
+.colord-hover:hover {
+    border-color: #54acde;
+    background-color: #54acde;
 }
 
 header {

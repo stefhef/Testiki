@@ -46,7 +46,7 @@ form:after {
 }
 
 .container {
-    margin: 25px auto;
+    margin: 10px auto;
     position: relative;
     width: 900px;
 }
@@ -69,7 +69,6 @@ form:after {
     padding: 25px 0 0;
     position: relative;
     text-align: center;
-    text-shadow: 0 1px 0 #fff;
     width: 400px;
 }
 
@@ -200,43 +199,12 @@ form:after {
 }
 
 #content form input[type="submit"] {
-    background: rgb(135, 206, 250);
-    background: -moz-linear-gradient(top, rgba(135, 206, 250, 1) 0%, rgba(30, 144, 255, 1) 100%);
-    background: -webkit-linear-gradient(top, rgba(135, 206, 250, 1) 0%, rgba(30, 144, 255, 1) 100%);
-    background: -o-linear-gradient(top, rgba(135, 206, 250, 1) 0%, rgba(30, 144, 255, 1) 100%);
-    background: -ms-linear-gradient(top, rgba(135, 206, 250, 1) 0%, rgba(30, 144, 255, 1) 100%);
-    background: linear-gradient(top, rgba(135, 206, 250, 1) 0%, rgba(30, 144, 255, 1) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#1e90ff', endColorstr='#1e90ff', GradientType=0);
-    -webkit-border-radius: 30px;
-    -moz-border-radius: 30px;
-    -ms-border-radius: 30px;
-    -o-border-radius: 30px;
-    border-radius: 30px;
-    -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
-    -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
-    -ms-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
-    -o-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
-    border: 1px solid #4682B4;
-    color: #191970;
     cursor: pointer;
     float: left;
-    font: bold 15px Helvetica, Arial, sans-serif;
     height: 35px;
     margin: 20px 0 35px 15px;
     position: relative;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    width: 120px;
-}
-
-#content form input[type="submit"]:hover {
-    background: rgb(135, 206, 250);
-    background: -moz-linear-gradient(top, rgba(30, 144, 255, 1) 0%, rgba(135, 206, 250, 1) 100%);
-    background: -webkit-linear-gradient(top, rgba(30, 144, 255, 1) 0%, rgba(135, 206, 250, 1) 100%);
-    background: -o-linear-gradient(top, rgba(30, 144, 255, 1) 0%, rgba(135, 206, 250, 1) 100%);
-    background: -ms-linear-gradient(top, rgba(30, 144, 255, 1) 0%, rgba(135, 206, 250, 1) 100%);
-    background: linear-gradient(top, rgba(30, 144, 255, 1) 0%, rgba(135, 206, 250, 1) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#1e90ff', endColorstr='#1e90ff', GradientType=0);
+    width: 100px;
 }
 
 #content form div a {
@@ -248,24 +216,6 @@ form:after {
 }
 
 .button {
-    background: rgb(247, 249, 250);
-    background: -moz-linear-gradient(top, rgba(247, 249, 250, 1) 0%, rgba(240, 240, 240, 1) 100%);
-    background: -webkit-linear-gradient(top, rgba(247, 249, 250, 1) 0%, rgba(240, 240, 240, 1) 100%);
-    background: -o-linear-gradient(top, rgba(247, 249, 250, 1) 0%, rgba(240, 240, 240, 1) 100%);
-    background: -ms-linear-gradient(top, rgba(247, 249, 250, 1) 0%, rgba(240, 240, 240, 1) 100%);
-    background: linear-gradient(top, rgba(247, 249, 250, 1) 0%, rgba(240, 240, 240, 1) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f9fa', endColorstr='#f0f0f0', GradientType=0);
-    -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
-    -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
-    -ms-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
-    -o-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
-    -webkit-border-radius: 0 0 5px 5px;
-    -moz-border-radius: 0 0 5px 5px;
-    -o-border-radius: 0 0 5px 5px;
-    -ms-border-radius: 0 0 5px 5px;
-    border-radius: 0 0 5px 5px;
-    border-top: 1px solid #CFD5D9;
     padding: 15px 0;
 }
 

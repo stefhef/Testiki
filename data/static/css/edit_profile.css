@@ -1,0 +1,16 @@
+caption {
+    caption-side: top;
+    font-size: 24px;
+}
+
+input {
+    width: 100%;
+}
+
+#about {
+    height: 50px;
+}
+
+#label_photo {
+    font-weight: bold;
+}

@@ -32,7 +32,7 @@ class Test(Base):
     image = sqlalchemy.Column(sqlalchemy.BLOB, nullable=False)
 
     def __repr__(self):
-        return f"ID:{self.id}\tНазвание теста: {self.test_name}\tПро тест:{self.about}\tID автора: {self.author}\tВремя создания: {self.created_date}"
+        return f"ID:{self.id} Название теста: {self.test_name} Про тест:{self.about} ID автора: {self.author} Время создания: {self.created_date}"
 
 
 class Question(Base):
@@ -46,7 +46,7 @@ class Question(Base):
                            backref="questions")
 
     def __repr__(self):
-        return f"ID:{self.id}\tТекст вопроса:{self.question}\tID автора: {self.id_author}"
+        return f"ID:{self.id} Текст вопроса:{self.question} ID автора: {self.id_author}"
 
 
 class Answer(Base):
@@ -58,4 +58,4 @@ class Answer(Base):
     id_author = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 
     def __repr__(self):
-        return f"ID:{self.id}\tТекст ответа:{self.answer}\tID автора: {self.id_author}\tПравильный: {self.is_true}"
+        return f"ID:{self.id} Текст ответа:{self.answer} ID автора: {self.id_author} Правильный: {self.is_true}"

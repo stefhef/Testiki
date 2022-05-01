@@ -44,18 +44,18 @@ async def login_p(request: Request,
                   session: AsyncSession = Depends(get_session)):
     """Обработчик входа"""
     data = await request.form()
-    # if not all(data):
-    #     return templates.TemplateResponse('login.html', context={'request': request, 'title': 'Не всё введено'})
 
     user = await session.execute(select(User).where(User.username == data['username']))
     user = user.scalars().first()
     if not user:
         return templates.TemplateResponse('login.html',
-                                          context={'request': request, 'title': 'Такого пользователя нет'})
+                                          context={'request': request, 'title': 'Вход',
+                                                   "error": "Логин или пароль неверны"})
 
     if not verify_password(data.get('password', None), user.hashed_password):
         return templates.TemplateResponse('login.html',
-                                          context={'request': request, 'title': 'Пароль неверный'})
+                                          context={'request': request, 'title': 'Вход',
+                                                   "error": "Логин или пароль неверны"})
 
     jwt_access_token = await create_access_token_user(user, session)
     result = templates.TemplateResponse('main.html',
@@ -71,14 +71,12 @@ async def test_auth(current_user=Depends(get_current_user)):
 
 
 @router.get("/register", response_class=HTMLResponse)
-async def register_p(request: Request,
-                     session: AsyncSession = Depends(get_session)):
+async def register_p(request: Request):
     return templates.TemplateResponse('register.html', context={'request': request, 'title': 'Авторизация'})
 
 
 @router.get("/lost_password")
-async def lost_password(request: Request,
-                        session: AsyncSession = Depends(get_session)):
+async def lost_password(request: Request):
     return templates.TemplateResponse("server_response.html", context={'request': request, 'title': 'Хехехе',
                                                                        'text': 'Ну сами виноваты',
                                                                        'status': 1})
@@ -88,17 +86,16 @@ async def lost_password(request: Request,
 async def register_p(request: Request,
                      session: AsyncSession = Depends(get_session)):
     data = await request.form()
-    # if not all(data.values()):
-    #     return templates.TemplateResponse('register.html',
-    #                                       context={'request': request, 'title': 'Не все данные введены'})
     res = await session.execute(select(User).where(User.email == data['email']))
     if res.scalars().first():
         return templates.TemplateResponse('register.html',
-                                          context={'request': request, 'title': 'Почта занята'})
+                                          context={'request': request, 'title': 'Регистрация',
+                                                   "error": "Почта занята"})
     res = await session.execute(select(User).where(User.username == data['username']))
     if res.scalars().first():
         return templates.TemplateResponse('register.html',
-                                          context={'request': request, 'title': 'Логин занят'})
+                                          context={'request': request, 'title': 'Регистрация',
+                                                   "error": "Логин занят"})
     dct = dict()
     for key, value in data.items():
         dct[key] = value

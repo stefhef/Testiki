@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <link rel="stylesheet" type="text/css" href="/static/css/edit_profile.css">
+    {% if error %}
+        <p class="alert alert-danger">{{ error }}</p>
+    {% endif %}
+    <div class="d-flex flex-row" style="margin: 10px">
+        <div class="d-flex flex-column" style="margin-right: 20px">
+            <img src="data:image/jpeg;base64,{{ image }}" alt="Фото профиля" class="w-100">
+        </div>
+        <form enctype="multipart/form-data" method="post">
+            <table class="table-light table-bordered w-100">
+                <caption class="table caption-top">Редактирование профиля</caption>
+                <tr>
+                    <td>
+                        <div class="form-group">
+                            <div class="d-flex flex-row">
+                                <label for="photo" id="label_photo">Фото
+                                    <input type="file" class="form-control-file" id="photo" name="photo">
+                                </label>
+
+                                <label>
+                                    Удалить фото?
+                                    <input type="checkbox" name="delete" value="delete">
+                                </label>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Имя</th>
+                </tr>
+                <tr>
+                    <td><input name="name" value="{{ name }}" id="name" type="text" required></td>
+                </tr>
+                <tr>
+                    <th>Фамилия</th>
+                </tr>
+                <tr>
+                    <td><input name="surname" value="{{ surname }}" id="surname" type="text" required></td>
+                </tr>
+                <tr>
+                    <th>Логин</th>
+                </tr>
+                <tr>
+                    <td><input name="username" value="{{ username }}" id="username" type="text" required></td>
+                </tr>
+                <tr>
+                    <th>Почта</th>
+                </tr>
+                <tr>
+                    <td><input name="email" value="{{ email }}" id="email" type="text" required></td>
+                </tr>
+                <tr>
+                    <th>О вас</th>
+                </tr>
+                <tr>
+                    <td><textarea name="about" cols="100" rows="5">{{ about }}</textarea></td>
+                </tr>
+                <tr>
+                    <td>
+                        <button type="submit" class="btn btn-primary">Сохранить профиль</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+{% endblock %}

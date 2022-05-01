@@ -13,7 +13,7 @@ from config import SECRET_KEY, JWT_ALGORITHM
 from core import init_db, get_session, vk_send_message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from do_image import do_random_image, do_user_image
+from core.do_image import do_random_image, do_user_image
 from routers import auth_router, user_router
 from test import Question, Test, Answer, questions_to_test, answers_to_question
 from user import get_current_user, user_availability, User
@@ -144,14 +144,14 @@ async def db_ks(request: Request,
 
 @app.post('/db_ks')
 async def db_ks(request: Request,
-                session: AsyncSession = Depends(get_session),
                 current_user=Depends(get_current_user)):
     data = await request.form()
     if not all(data.values()):
         return templates.TemplateResponse('test_f.html',
-                                          context={'request': request, 'title': 'Ай-ай-ай'})
+                                          context={'request': request, 'title': 'Создание тестиков',
+                                                   "error": "Не всё введено"})
     answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request,
-                                                                        'title': 'Создание тестиков',
+                                                                        'title': 'Создание пестиков',
                                                                         'n_questions': int(
                                                                             data['questions']),
                                                                         'n_answers': int(
@@ -179,10 +179,10 @@ async def obr(request: Request,
               test_name: Optional[str] = Cookie(None),
               about: Optional[str] = Cookie(None)):
     if questions == 0 or answers == 0:
-        return templates.TemplateResponse('server_response.html', context={'request': request,
-                                                                           'text': 'Эммммммм',
-                                                                           'status': 0,
-                                                                           'current_user': current_user})
+        return templates.TemplateResponse('test_2.html', context={'request': request,
+                                                                  'text': 'Эммммммм',
+                                                                  'status': 0,
+                                                                  'current_user': current_user})
     data = await request.form()
     a = await data["file"].read()
     if not a:
@@ -231,7 +231,8 @@ async def obr(request: Request,
                                                                   'title': 'Не всё введено',
                                                                   'n_questions': questions,
                                                                   'n_answers': answers,
-                                                                  'current_user': current_user})
+                                                                  'current_user': current_user,
+                                                                  "error": "Не всё введено"})
 
     test.questions.append(question)
     session.add(question)
@@ -289,9 +290,8 @@ async def result_testik(test_id: int,
                         request: Request,
                         session: AsyncSession = Depends(get_session),
                         current_user=Depends(get_current_user)):
-
-    testik = await session.execute(select(Test).where(Test.id == test_id))
-    testik = testik.scalars().first()
+    query = await session.execute(select(Test).where(Test.id == test_id))
+    testik = query.scalars().first()
 
     q = await session.execute(
         select(Question).join(questions_to_test).join(Test).where(Test.id == test_id))
@@ -350,8 +350,9 @@ async def result_testik(test_id: int,
                                                                              'end': f'Правильных ответов {count}/{len(true_answers)}, вы справились с тестом на {round(count / len(true_answers) * 100, 2)}%'})
     else:
         response = templates.TemplateResponse("testik.html", context={"request": request,
-                                                                      "title": 'ТЕСТИК!!! Вы ответили не на все вопросики(',
+                                                                      "title": 'ТЕСТИК!!!',
                                                                       'test_name': testik.test_name,
+                                                                      "warning": "Вы ответили не на все вопросики(",
                                                                       'about_test': testik.about,
                                                                       'author': author_of_test,
                                                                       'date': testik.created_date,

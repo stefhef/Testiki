@@ -2,16 +2,38 @@
 
 {% block content %}
     <link href="/static/css/profile.css" rel="stylesheet" type="text/css">
-    <div>
-        <h1>{{ name }} {{ surname }}</h1>
-        <p>Логин: {{ login }}</p>
-        <p>Почта: {{ email }}</p>
-        <p>О вас: {{ about }}</p>
-        <p></p>
+
+    <div class="d-flex flex-column justify-content-center">
+        <object class="d-flex justify-content-center">
+            <img src="data:image/jpeg;base64,{{ image }}" alt="Фото профиля"
+                 class="d-flex justify-content-center w-25 h-auto">
+        </object>
+        <h1 class="d-flex justify-content-center">{{ name }} {{ surname }}</h1>
+        <table class="table table-striped info" border="2">
+            <caption class="table caption-top">Информация</caption>
+            <tbody>
+            <tr>
+                <td>Логин</td>
+                <td>{{ username }}</td>
+            </tr>
+
+            <tr>
+                <td>Почта</td>
+                <td>{{ email }}</td>
+            </tr>
+            <tr>
+                <td>О вас</td>
+                <td>{{ about }}</td>
+            </tr>
+            </tbody>
+        </table>
+        <a href="/user/edit_profile" class="btn btn-info cntr" style="width: auto; height: auto">Редактировать</a>
     </div>
+
+
     <div>
         <table border="2" align="center">
-        <caption align="top">Мои тесты</caption>
+            <caption align="top">Мои тесты</caption>
             <tr>
                 <th>Название</th>
                 <th>Описание</th>
@@ -24,7 +46,7 @@
                     <td>{{ test.test_name }}</td>
                     <td>{{ test.about }}</td>
                     <td>{{ test.created_date }}</td>
-{#                    <td><button value="/testik/{{ test.id }}" class="btn btn-primary" type="submit">Тык))</button></td>#}
+                    {#                    <td><button value="/testik/{{ test.id }}" class="btn btn-primary" type="submit">Тык))</button></td>#}
                     <td><a href="/testik/{{ test.id }}" class="btn btn-primary">Тык))</a></td>
                 </tr>
             {% endfor %}
