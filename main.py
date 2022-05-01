@@ -15,7 +15,7 @@ from config import SECRET_KEY, JWT_ALGORITHM
 from core import init_db, get_session, vk_send_message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from do_image import do_random_image
+from do_image import do_random_image, do_user_image
 from routers import auth_router, user_router
 from test import Question, Test, Answer, questions_to_test, answers_to_question
 from user import get_current_user, user_availability, User
@@ -185,9 +185,9 @@ async def obr(request: Request,
     data = await request.form()
     a = await data["file"].read()
     if not a:
-        a = do_random_image(400, 300)
+        a = do_random_image(800, 600)
     else:
-        a = base64.b64encode(a)
+        a = do_user_image((800, 600), a)
 
     if not all(data.values()):
         return templates.TemplateResponse('test_2.html', context={'request': request,
