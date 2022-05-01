@@ -14,10 +14,11 @@ from fastapi.templating import Jinja2Templates
 from config import SECRET_KEY, JWT_ALGORITHM
 from core import init_db, get_session, vk_send_message
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from do_image import do_image
 from routers import auth_router, user_router
 from test import Question, Test, Answer, questions_to_test, answers_to_question
 from user import get_current_user, user_availability, User
-import PIL.Image as Image
 
 app = FastAPI()
 app.include_router(auth_router)
@@ -183,6 +184,8 @@ async def obr(request: Request,
                                                                            'current_user': user})
     data = await request.form()
     a = await data["file"].read()
+    if not a:
+        a = do_image(400, 300)
 
     if not all(data.values()):
         return templates.TemplateResponse('test_2.html', context={'request': request,
@@ -268,6 +271,7 @@ async def testik(test_id: int,
             new_dict['answers'].append(el.answer)
         questions_and_answers[i] = new_dict
     image = str(base64.b64encode(testik.image))[2:-1]
+    print(image)
     response = templates.TemplateResponse("testik.html", context={"request": request,
                                                                   "title": 'ТЕСТИК!!!',
                                                                   'test_name': testik.test_name,
@@ -315,6 +319,7 @@ async def result_testik(test_id: int,
 
     data = await request.form()
     image = str(base64.b64encode(testik.image))[2:-1]
+    print('!!!!', image)
     user_answers = []
     for key, value in data.items():
         if 'answer' in key:
@@ -322,7 +327,6 @@ async def result_testik(test_id: int,
     for key, value in questions_and_answers.items():
         for n, elem in enumerate(value['answers']):
             for element in user_answers:
-                print('!!!', elem[0], element)
                 if elem[0] == element:
                     questions_and_answers[key]['answers'][n] = (elem[0], elem[1], True)
                     break

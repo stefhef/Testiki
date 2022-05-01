@@ -47,7 +47,7 @@ async def login_p(request: Request,
     # if not all(data):
     #     return templates.TemplateResponse('login.html', context={'request': request, 'title': 'Не всё введено'})
 
-    user = await session.execute(select(User).where(User.username == data['login']))
+    user = await session.execute(select(User).where(User.username == data['username']))
     user = user.scalars().first()
     if not user:
         return templates.TemplateResponse('login.html',
