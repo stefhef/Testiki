@@ -1,9 +1,29 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
-    <div>
-        <button name="make_test" onclick="window.location.href='/db_ks'" class="btn btn-primary" id="make_test">Создать тестик</button>
-        <p class="cntr">Тут будут тестики</p>
-    </div>
+<link rel="stylesheet" type="text/css" href="/static/css/main.css">
+<div>
+    <button name="make_test" onclick="window.location.href='/db_ks'" class="btn btn-primary"
+            id="make_test">Создать тестик
+    </button>
+    <p class="cntr">Тут будут тестики</p>
+    <table class="test_main">
+        <tr>
+            {% for test in tests %}
+            {% if loop.index0 % 3 == 0 %}
+        </tr>
+        <tr>
+            {% endif %}
+
+            <td>
+                <div class="d-flex flex-row">
+                    <img src="data:image/jpeg;base64,{{ test.image }}" alt="">
+                    <p>{{ test.test_name }}</p>
+                    <p>{{ test.about }}</p>
+                </div>
+            </td>
+            {% endfor %}
+        </tr>
+    </table>
+</div>
 {% endblock %}

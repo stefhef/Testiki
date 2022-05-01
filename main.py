@@ -71,9 +71,15 @@ async def say_hello(request: Request,
 async def root(request: Request,
                session: AsyncSession = Depends(get_session)):
     user = await user_availability(request.cookies.get('access_token', None), session)
+    query = await session.execute(select(Test))
+    tests = query.scalars().all()
+    await session.close()
+    for test in tests:
+        test.image = str(test.image)[2:-1]
     return templates.TemplateResponse("main.html",
                                       {"request": request, "title": 'Главная страница',
-                                       'current_user': user})
+                                       'current_user': user,
+                                       'tests': tests})
 
 
 @app.get("/complaint")
@@ -109,7 +115,6 @@ async def p_complaint(request: Request,
 async def complaint(request: Request,
                     current_user=Depends(get_current_user),
                     session: AsyncSession = Depends(get_session)):
-    user = await user_availability(request.cookies.get('access_token', None), session)
     async with aiohttp.ClientSession() as session_h:
         async with session_h.get(
                 "https://evilinsult.com/generate_insult.php?lang=ru&type=json") as resp:
@@ -125,23 +130,22 @@ async def complaint(request: Request,
                                                                "title": 'Сообщение сервера',
                                                                "status": 1,
                                                                "text": "Поздравляем! Вы обозвали администраторов",
-                                                               'current_user': user})
+                                                               'current_user': current_user})
 
 
 @app.get("/db_ks")
 async def db_ks(request: Request,
-                session: AsyncSession = Depends(get_session)):
-    user = await user_availability(request.cookies.get('access_token', None), session)
+                session: AsyncSession = Depends(get_session),
+                current_user=Depends(get_current_user)):
     return templates.TemplateResponse('test_f.html', context={'request': request,
                                                               'title': 'Создание теста',
-                                                              'current_user': user})
+                                                              'current_user': current_user})
 
 
 @app.post('/db_ks')
 async def db_ks(request: Request,
                 session: AsyncSession = Depends(get_session),
                 current_user=Depends(get_current_user)):
-    user = await user_availability(request.cookies.get('access_token', None), session)
     data = await request.form()
     if not all(data.values()):
         return templates.TemplateResponse('test_f.html',
@@ -152,7 +156,7 @@ async def db_ks(request: Request,
                                                                             data['questions']),
                                                                         'n_answers': int(
                                                                             data['answers']),
-                                                                        "current_user": user})
+                                                                        "current_user": current_user})
 
     answ_and_quest.set_cookie('questions', data['questions'], httponly=True)
     answ_and_quest.set_cookie('answers', data['answers'], httponly=True)
@@ -174,12 +178,11 @@ async def obr(request: Request,
               answers: Optional[int] = Cookie(None),
               test_name: Optional[str] = Cookie(None),
               about: Optional[str] = Cookie(None)):
-    user = await user_availability(request.cookies.get('access_token', None), session)
     if questions == 0 or answers == 0:
         return templates.TemplateResponse('server_response.html', context={'request': request,
                                                                            'text': 'Эммммммм',
                                                                            'status': 0,
-                                                                           'current_user': user})
+                                                                           'current_user': current_user})
     data = await request.form()
     a = await data["file"].read()
     if not a:
@@ -192,7 +195,7 @@ async def obr(request: Request,
                                                                   'title': 'Не всё введено',
                                                                   'n_questions': questions,
                                                                   'n_answers': answers,
-                                                                  'current_user': user})
+                                                                  'current_user': current_user})
 
     test_name = jwt.decode(test_name, SECRET_KEY, algorithms=[JWT_ALGORITHM]).get('test_name')
     about = jwt.decode(about, SECRET_KEY, algorithms=[JWT_ALGORITHM]).get('about')
@@ -228,7 +231,7 @@ async def obr(request: Request,
                                                                   'title': 'Не всё введено',
                                                                   'n_questions': questions,
                                                                   'n_answers': answers,
-                                                                  'current_user': user})
+                                                                  'current_user': current_user})
 
     test.questions.append(question)
     session.add(question)
@@ -238,7 +241,7 @@ async def obr(request: Request,
 
     response = templates.TemplateResponse("main.html", {"request": request,
                                                         "title": 'Главная страница',
-                                                        'current_user': user})
+                                                        'current_user': current_user})
     response.set_cookie('answers', '0')
     response.set_cookie('questions', '0')
     return response
@@ -249,7 +252,6 @@ async def testik(test_id: int,
                  request: Request,
                  session: AsyncSession = Depends(get_session),
                  current_user=Depends(get_current_user)):
-    user = await user_availability(request.cookies.get('access_token', None), session)
     testik = await session.execute(select(Test).where(Test.id == test_id))
     testik = testik.scalars().first()
     author_of_test = await session.execute(select(User.username).where(User.id == testik.author))
@@ -266,7 +268,7 @@ async def testik(test_id: int,
             select(Answer).join(answers_to_question).join(Question).where(Question.id == q_id))
         a = a.scalars().all()
         for el in a:
-            new_dict['answers'].append(el.answer)
+            new_dict['answers'].append([el.answer])
         questions_and_answers[i] = new_dict
     image = str(testik.image)[2:-1]
     response = templates.TemplateResponse("testik.html", context={"request": request,
@@ -277,9 +279,8 @@ async def testik(test_id: int,
                                                                   'date': testik.created_date,
                                                                   'img': image,
                                                                   'questions_and_answers': questions_and_answers,
-                                                                  'current_user': user,
-                                                                  'test_id': test_id,
-                                                                  'count': 0})
+                                                                  'current_user': current_user,
+                                                                  'test_id': test_id})
     return response
 
 
@@ -288,7 +289,6 @@ async def result_testik(test_id: int,
                         request: Request,
                         session: AsyncSession = Depends(get_session),
                         current_user=Depends(get_current_user)):
-    user = await user_availability(request.cookies.get('access_token', None), session)
 
     testik = await session.execute(select(Test).where(Test.id == test_id))
     testik = testik.scalars().first()
@@ -345,7 +345,7 @@ async def result_testik(test_id: int,
                                                                              'date': testik.created_date,
                                                                              'img': image,
                                                                              'questions_and_answers': questions_and_answers,
-                                                                             'current_user': user,
+                                                                             'current_user': current_user,
                                                                              'test_id': test_id,
                                                                              'end': f'Правильных ответов {count}/{len(true_answers)}, вы справились с тестом на {round(count / len(true_answers) * 100, 2)}%'})
     else:
@@ -357,9 +357,8 @@ async def result_testik(test_id: int,
                                                                       'date': testik.created_date,
                                                                       'img': image,
                                                                       'questions_and_answers': questions_and_answers,
-                                                                      'current_user': user,
-                                                                      'test_id': test_id,
-                                                                      'count': 1})
+                                                                      'current_user': current_user,
+                                                                      'test_id': test_id})
     return response
 
 
