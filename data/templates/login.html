@@ -2,6 +2,9 @@
 
 {% block content %}
     <link rel="stylesheet" type="text/css" href="/static/css/login.css"/>
+    {% if error %}
+        <p class="alert alert-danger">{{ error }}</p>
+    {% endif %}
     <div class="container">
         <section id="content">
             <form action="/auth/login" method="post">
@@ -13,12 +16,11 @@
                     <input type="password" placeholder="Пароль" required="" id="password" name="password"/>
                 </div>
                 <div>
-                    <input type="submit" value="Войти"/>
+                    <input type="submit" value="Войти" class="btn colord"/>
                     <a href="/auth/lost_password">Забыли пароль?</a>
                     <a href="/auth/register">Регистрация</a>
                 </div>
             </form>
-
         </section>
     </div>
 {% endblock %}

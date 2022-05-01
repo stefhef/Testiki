@@ -5,7 +5,7 @@ from io import BytesIO
 from PIL import Image
 
 
-def do_random_image(width, height):
+def do_random_image(width: int, height: int):
     r, g, b = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
     image = Image.new('RGB', (width, height), (r, g, b))
     im_file = BytesIO()
@@ -15,8 +15,9 @@ def do_random_image(width, height):
     return im_b64
 
 
-def do_user_image(size: tuple, image):
+def do_user_image(size: tuple, image: bytes):
     image = Image.open(io.BytesIO(image))
+    image = image.convert('RGB')
     img_size = image.size
     x = int(img_size[0]) // 4
     if x * 3 > img_size[1]:
@@ -28,8 +29,3 @@ def do_user_image(size: tuple, image):
     im_bytes = im_file.getvalue()
     im_b64 = base64.b64encode(im_bytes)
     return im_b64
-
-
-if __name__ == '__main__':
-    image = do_image(500, 500)
-    print(image)

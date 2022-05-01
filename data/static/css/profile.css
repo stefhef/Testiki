@@ -7,4 +7,10 @@ caption {
 
 td {
     text-align: center;
+    border: 1px solid;
 }
+
+/*.info {*/
+/*    width: 70%;*/
+/*    border-color: black;*/
+/*}*/

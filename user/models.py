@@ -23,6 +23,7 @@ class User(Base):
     created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     is_admin = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=False)
     vk_id = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    image = sqlalchemy.Column(sqlalchemy.BLOB, nullable=True)
     status = sqlalchemy.Column(sqlalchemy.Enum(UserStatus), default=UserStatus.UNDEFINED)
 
     def __repr__(self):
