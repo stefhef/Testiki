@@ -7,6 +7,7 @@
 <h4>Автор теста: {{ author }}</h4>
 <h4>Тест создан: {{ date }}</h4>
 <form action="/testik/{{ test_id }}" method="post">
+    {% if count == 0 %}
     {% for key, value in questions_and_answers.items() %}
     <p>{{ key + 1 }}. {{ value['question'] }}
         {% for answer in value['answers'] %}
@@ -14,6 +15,15 @@
         {% endfor %}
         {% endfor %}
         <br></p>
+    {% else %}
+    {% for key, value in questions_and_answers.items() %}
+    <p>{{ key + 1 }}. {{ value['question'] }}
+        {% for answer in value['answers'] %}
+        <br><input type="radio" class="answer" name="answer{{ key }}" value="{{ answer[0] }}"> {{ answer[0] }}
+        {% endfor %}
+        {% endfor %}
+        <br></p>
+    {% endif %}
     <button type="submit" class="btn btn-primary">Готово!</button>
 </form>
 {% endblock %}

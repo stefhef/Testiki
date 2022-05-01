@@ -1,14 +1,12 @@
-import base64
 import datetime
-import io
 from typing import Optional
 import aiohttp as aiohttp
 import uvicorn as uvicorn
-from fastapi import FastAPI, Request, Depends, Cookie, UploadFile
+from fastapi import FastAPI, Request, Depends, Cookie
 from jose import jwt
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, insert, func, update
+from sqlalchemy import select, func, update
 import asyncio
 from fastapi.templating import Jinja2Templates
 from config import SECRET_KEY, JWT_ALGORITHM
@@ -280,7 +278,8 @@ async def testik(test_id: int,
                                                                   'img': image,
                                                                   'questions_and_answers': questions_and_answers,
                                                                   'current_user': user,
-                                                                  'test_id': test_id})
+                                                                  'test_id': test_id,
+                                                                  'count': 0})
     return response
 
 
@@ -359,7 +358,8 @@ async def result_testik(test_id: int,
                                                                       'img': image,
                                                                       'questions_and_answers': questions_and_answers,
                                                                       'current_user': user,
-                                                                      'test_id': test_id})
+                                                                      'test_id': test_id,
+                                                                      'count': 1})
     return response
 
 
