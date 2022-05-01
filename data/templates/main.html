@@ -6,7 +6,6 @@
     <button name="make_test" onclick="window.location.href='/db_ks'" class="btn btn-primary"
             id="make_test">Создать тестик
     </button>
-    <p class="cntr">Тут будут тестики</p>
     <table class="test_main">
         <tr>
             {% for test in tests %}
@@ -16,11 +15,19 @@
             {% endif %}
 
             <td>
-                <div class="d-flex flex-row">
-                    <img src="data:image/jpeg;base64,{{ test.image }}" alt="" height="150" width="200">
-                    <p>{{ test.test_name }}</p>
-                    <p>{{ test.about }}</p>
-                </div>
+                <a href="/testik/{{ test.id }}">
+                    <div class="card bg-dark text-white">
+                        <div class="d-flex flex-column">
+                            <img class="card-img" src="data:image/jpeg;base64,{{ test.image }}"
+                                 alt="" height="240"
+                                 width="320">
+                            <div class="card-img-overlay">
+                                <p class="card-title">{{ test.test_name }}</p>
+                                <p class="card-title">{{ test.about }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </td>
             {% endfor %}
         </tr>
