@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from user.auth import get_password_hash, verify_password, create_access_token_user, \
     get_current_user
-from core.db import get_session
+from core import get_session, do_random_image
 from user.models import User
 
 templates = Jinja2Templates(directory="data/templates")
@@ -100,7 +100,8 @@ async def register_p(request: Request,
     for key, value in data.items():
         dct[key] = value
     dct['hashed_password'] = get_password_hash(dct['hashed_password'])
+    dct['image'] = do_random_image(800, 600)
     await session.execute(insert(User).values(**dct))
     await session.commit()
     await session.close()
-    return RedirectResponse('/auth/login')
+    return RedirectResponse('/auth/login', status_code=302)
