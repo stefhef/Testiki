@@ -39,7 +39,7 @@
             </form>
             {% if current_user %}
                 <div>
-                    <a class="btn colord" href="/user/profile">Профиль</a>
+                    <a class="btn colord" href="/user/profile"> <img src="data:image/jpeg;base64,{{ current_user.image.__str__()[2:-1] }}" alt="" width=30>  Профиль</a>
                     <a class="btn colord" href="/auth/logout">Выйти</a>
                 </div>
             {% else %}

@@ -5,7 +5,7 @@
 
     <div class="d-flex flex-column justify-content-center">
         <object class="d-flex justify-content-center">
-            <img src="data:image/jpeg;base64,{{ image }}" alt="Фото профиля"
+            <img src="data:image/jpeg;base64,{{ image.__str__()[2:-1] }}" alt="Фото профиля"
                  class="d-flex justify-content-center w-25 h-auto">
         </object>
         <h1 class="d-flex justify-content-center">{{ name }} {{ surname }}</h1>
@@ -27,18 +27,24 @@
             </tr>
             </tbody>
         </table>
-        <a href="/user/edit_profile" class="btn btn-info cntr" style="width: auto; height: auto">Редактировать</a>
+        {% if me %}
+            <a href="/user/edit_profile" class="btn btn-info cntr" style="width: auto; height: auto;">Редактировать</a>
+        {% endif %}
     </div>
 
 
     <div>
         <table border="2" align="center">
-            <caption align="top">Мои тесты</caption>
+            {% if me %}
+                <caption align="top" style="color: black">Мои тесты</caption>
+            {% else %}
+                <caption align="top" style="color: black">Тесты пользователя</caption>
+            {% endif %}
             <tr>
                 <th>Название</th>
                 <th>Описание</th>
                 <th>Дата создания</th>
-                <th>Ссылка на тест</th>
+                <th>Ссылочка на тест</th>
             </tr>
 
             {% for test in user_tests %}
@@ -46,7 +52,6 @@
                     <td>{{ test.test_name }}</td>
                     <td>{{ test.about }}</td>
                     <td>{{ test.created_date }}</td>
-                    {#                    <td><button value="/testik/{{ test.id }}" class="btn btn-primary" type="submit">Тык))</button></td>#}
                     <td><a href="/testik/{{ test.id }}" class="btn btn-primary">Тык))</a></td>
                 </tr>
             {% endfor %}

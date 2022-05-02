@@ -7,7 +7,7 @@
     {% endif %}
     <div class="d-flex flex-row" style="margin: 10px">
         <div class="d-flex flex-column" style="margin-right: 20px">
-            <img src="data:image/jpeg;base64,{{ image }}" alt="Фото профиля" class="w-100">
+            <img src="data:image/jpeg;base64,{{ image.__str__()[2:-1] }}" alt="Фото профиля" class="w-100">
         </div>
         <form enctype="multipart/form-data" method="post">
             <table class="table-light table-bordered w-100">

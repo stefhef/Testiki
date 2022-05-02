@@ -3,6 +3,7 @@ from typing import Optional
 import aiohttp as aiohttp
 import uvicorn as uvicorn
 from fastapi import FastAPI, Request, Depends, Cookie
+from fastapi.responses import RedirectResponse
 from jose import jwt
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
@@ -12,7 +13,6 @@ from fastapi.templating import Jinja2Templates
 from config import SECRET_KEY, JWT_ALGORITHM
 from core import init_db, get_session, vk_send_message
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from core.do_image import do_random_image, do_user_image
 from routers import auth_router, user_router
 from test import Question, Test, Answer, questions_to_test, answers_to_question
@@ -135,7 +135,6 @@ async def complaint(request: Request,
 
 @app.get("/db_ks")
 async def db_ks(request: Request,
-                session: AsyncSession = Depends(get_session),
                 current_user=Depends(get_current_user)):
     return templates.TemplateResponse('test_f.html', context={'request': request,
                                                               'title': 'Создание теста',
@@ -240,9 +239,7 @@ async def obr(request: Request,
     await session.commit()
     await session.close()
 
-    response = templates.TemplateResponse("main.html", {"request": request,
-                                                        "title": 'Главная страница',
-                                                        'current_user': current_user})
+    response = RedirectResponse('/', status_code=302)
     response.set_cookie('answers', '0')
     response.set_cookie('questions', '0')
     return response
@@ -255,7 +252,7 @@ async def testik(test_id: int,
                  current_user=Depends(get_current_user)):
     testik = await session.execute(select(Test).where(Test.id == test_id))
     testik = testik.scalars().first()
-    author_of_test = await session.execute(select(User.username).where(User.id == testik.author))
+    author_of_test = await session.execute(select(User).where(User.id == testik.author))
     author_of_test = author_of_test.scalars().first()
     questions_and_answers = {}
     q = await session.execute(
@@ -271,14 +268,13 @@ async def testik(test_id: int,
         for el in a:
             new_dict['answers'].append([el.answer])
         questions_and_answers[i] = new_dict
-    image = str(testik.image)[2:-1]
     response = templates.TemplateResponse("testik.html", context={"request": request,
                                                                   "title": 'ТЕСТИК!!!',
                                                                   'test_name': testik.test_name,
                                                                   'about_test': testik.about,
                                                                   'author': author_of_test,
                                                                   'date': testik.created_date,
-                                                                  'img': image,
+                                                                  'img': testik.image,
                                                                   'questions_and_answers': questions_and_answers,
                                                                   'current_user': current_user,
                                                                   'test_id': test_id})
@@ -316,7 +312,6 @@ async def result_testik(test_id: int,
     true_answers = list(filter(lambda x: x[1] is True, all_answers))
 
     data = await request.form()
-    image = str(testik.image)[2:-1]
 
     user_answers = []
     for key, value in data.items():
@@ -324,12 +319,10 @@ async def result_testik(test_id: int,
             user_answers.append(value)
     for key, value in questions_and_answers.items():
         for n, elem in enumerate(value['answers']):
-            for element in user_answers:
-                if elem[0] == element:
-                    questions_and_answers[key]['answers'][n] = (elem[0], elem[1], True)
-                    break
-                else:
-                    questions_and_answers[key]['answers'][n] = (elem[0], elem[1], False)
+            if elem[0] == user_answers[key]:
+                questions_and_answers[key]['answers'][n] = (elem[0], elem[1], True)
+            else:
+                questions_and_answers[key]['answers'][n] = (elem[0], elem[1], False)
     count = 0
     if len(true_answers) == len(user_answers):
         for true_a, user_a in zip(true_answers, user_answers):
@@ -342,7 +335,7 @@ async def result_testik(test_id: int,
                                                                              'about_test': testik.about,
                                                                              'author': author_of_test,
                                                                              'date': testik.created_date,
-                                                                             'img': image,
+                                                                             'img': testik.image,
                                                                              'questions_and_answers': questions_and_answers,
                                                                              'current_user': current_user,
                                                                              'test_id': test_id,
@@ -355,7 +348,7 @@ async def result_testik(test_id: int,
                                                                       'about_test': testik.about,
                                                                       'author': author_of_test,
                                                                       'date': testik.created_date,
-                                                                      'img': image,
+                                                                      'img': testik.image,
                                                                       'questions_and_answers': questions_and_answers,
                                                                       'current_user': current_user,
                                                                       'test_id': test_id})
