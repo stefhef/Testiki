@@ -135,6 +135,7 @@ async def complaint(request: Request,
 
 @app.get("/db_ks")
 async def db_ks(request: Request,
+                session: AsyncSession = Depends(get_session),
                 current_user=Depends(get_current_user)):
     return templates.TemplateResponse('test_f.html', context={'request': request,
                                                               'title': 'Создание теста',
