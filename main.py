@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select, func, update
 import asyncio
 from fastapi.templating import Jinja2Templates
-from starlette.responses import RedirectResponse
+from fastapi.responses import RedirectResponse
 
 from config import SECRET_KEY, JWT_ALGORITHM
 from core import init_db, get_session, vk_send_message
@@ -135,30 +135,35 @@ async def complaint(request: Request,
                                                                'current_user': current_user})
 
 
-@app.get("/db_ks")
-async def db_ks(request: Request,
-                session: AsyncSession = Depends(get_session),
-                current_user=Depends(get_current_user)):
-    return templates.TemplateResponse('test_f.html', context={'request': request,
-                                                              'title': 'Создание теста',
-                                                              'current_user': current_user})
+@app.get("/make_test")
+async def make_test(request: Request,
+                    session: AsyncSession = Depends(get_session),
+                    current_user=Depends(get_current_user)):
+    return templates.TemplateResponse('make_test_first.html', context={'request': request,
+                                                                       'title': 'Создание теста',
+                                                                       'current_user': current_user})
 
 
-@app.post('/db_ks')
-async def db_ks(request: Request,
-                current_user=Depends(get_current_user)):
+@app.post('/make_test')
+async def make_test(request: Request,
+                    current_user=Depends(get_current_user)):
     data = await request.form()
     if not all(data.values()):
-        return templates.TemplateResponse('test_f.html',
+        return templates.TemplateResponse('make_test_first.html',
                                           context={'request': request, 'title': 'Создание тестиков',
                                                    "error": "Не всё введено"})
-    answ_and_quest = templates.TemplateResponse('test_2.html', context={'request': request,
-                                                                        'title': 'Создание пестиков',
-                                                                        'n_questions': int(
-                                                                            data['questions']),
-                                                                        'n_answers': int(
-                                                                            data['answers']),
-                                                                        "current_user": current_user})
+    try:
+        answ_and_quest = templates.TemplateResponse('make_test_second.html', context={'request': request,
+                                                                                      'title': 'Создание тестиков',
+                                                                                      'n_questions': int(
+                                                                                          data['questions']),
+                                                                                      'n_answers': int(
+                                                                                          data['answers']),
+                                                                                      "current_user": current_user})
+    except ValueError:
+        return templates.TemplateResponse('make_test_first.html',
+                                          context={'request': request, 'title': 'Создание тестиков',
+                                                   "error": "Вы зачем пишите буковки туда, куда надо писать число?... Мы в шоке просто с вас..."})
 
     answ_and_quest.set_cookie('questions', data['questions'], httponly=True)
     answ_and_quest.set_cookie('answers', data['answers'], httponly=True)
@@ -181,10 +186,10 @@ async def obr(request: Request,
               test_name: Optional[str] = Cookie(None),
               about: Optional[str] = Cookie(None)):
     if questions == 0 or answers == 0:
-        return templates.TemplateResponse('test_2.html', context={'request': request,
-                                                                  'text': 'Эммммммм',
-                                                                  'status': 0,
-                                                                  'current_user': current_user})
+        return templates.TemplateResponse('make_test_second.html', context={'request': request,
+                                                                            'text': 'Эммммммм',
+                                                                            'status': 0,
+                                                                            'current_user': current_user})
     data = await request.form()
     a = await data["file"].read()
     if not a:
@@ -193,11 +198,11 @@ async def obr(request: Request,
         a = do_user_image((800, 600), a)
 
     if not all(data.values()):
-        return templates.TemplateResponse('test_2.html', context={'request': request,
-                                                                  'title': 'Не всё введено',
-                                                                  'n_questions': questions,
-                                                                  'n_answers': answers,
-                                                                  'current_user': current_user})
+        return templates.TemplateResponse('make_test_second.html', context={'request': request,
+                                                                            'title': 'Не всё введено',
+                                                                            'n_questions': questions,
+                                                                            'n_answers': answers,
+                                                                            'current_user': current_user})
 
     test_name = jwt.decode(test_name, SECRET_KEY, algorithms=[JWT_ALGORITHM]).get('test_name')
     about = jwt.decode(about, SECRET_KEY, algorithms=[JWT_ALGORITHM]).get('about')
@@ -229,12 +234,12 @@ async def obr(request: Request,
             await session.execute(update(Answer).where(Answer.id == id_t).values(is_true=True))
 
     if questions != is_t_count:
-        return templates.TemplateResponse('test_2.html', context={'request': request,
-                                                                  'title': 'Не всё введено',
-                                                                  'n_questions': questions,
-                                                                  'n_answers': answers,
-                                                                  'current_user': current_user,
-                                                                  "error": "Не всё введено"})
+        return templates.TemplateResponse('make_test_second.html', context={'request': request,
+                                                                            'title': 'Не всё введено',
+                                                                            'n_questions': questions,
+                                                                            'n_answers': answers,
+                                                                            'current_user': current_user,
+                                                                            "error": "Не всё введено"})
 
     test.questions.append(question)
     session.add(question)
@@ -242,7 +247,7 @@ async def obr(request: Request,
     await session.commit()
     await session.close()
 
-    response = RedirectResponse('/')
+    response = RedirectResponse('/', status_code=302)
     response.set_cookie('answers', '0')
     response.set_cookie('questions', '0')
     return response
@@ -324,39 +329,42 @@ async def result_testik(test_id: int,
             user_answers.append(value)
     for key, value in questions_and_answers.items():
         for n, elem in enumerate(value['answers']):
-            if elem[0] == user_answers[key]:
-                questions_and_answers[key]['answers'][n] = (elem[0], elem[1], True)
-            else:
-                questions_and_answers[key]['answers'][n] = (elem[0], elem[1], False)
+            try:
+                if elem[0] == user_answers[key]:
+                    questions_and_answers[key]['answers'][n] = (elem[0], elem[1], True)
+                else:
+                    questions_and_answers[key]['answers'][n] = (elem[0], elem[1], False)
+            except IndexError:
+                response = templates.TemplateResponse("testik.html", context={"request": request,
+                                                                              "title": 'ТЕСТИК!!!',
+                                                                              'test_name': testik.test_name,
+                                                                              "warning": "Вы ответили не на все вопросики(",
+                                                                              'about_test': testik.about,
+                                                                              'author': author_of_test,
+                                                                              'date': testik.created_date,
+                                                                              'img': image,
+                                                                              'questions_and_answers': questions_and_answers,
+                                                                              'current_user': current_user,
+                                                                              'test_id': test_id})
+                return response
     count = 0
-    if len(true_answers) == len(user_answers):
-        for true_a, user_a in zip(true_answers, user_answers):
-            if true_a[0] == user_a:
-                count += 1
+    for true_a, user_a in zip(true_answers, user_answers):
+        if true_a[0] == user_a:
+            count += 1
 
-        response = templates.TemplateResponse("testik_result.html", context={"request": request,
-                                                                             "title": 'ТЕСТИК!!! Результатики)',
-                                                                             'test_name': testik.test_name,
-                                                                             'about_test': testik.about,
-                                                                             'author': author_of_test,
-                                                                             'date': testik.created_date,
-                                                                             'img': image,
-                                                                             'questions_and_answers': questions_and_answers,
-                                                                             'current_user': current_user,
-                                                                             'test_id': test_id,
-                                                                             'end': f'Правильных ответов {count}/{len(true_answers)}, вы справились с тестом на {round(count / len(true_answers) * 100, 2)}%'})
-    else:
-        response = templates.TemplateResponse("testik.html", context={"request": request,
-                                                                      "title": 'ТЕСТИК!!!',
-                                                                      'test_name': testik.test_name,
-                                                                      "warning": "Вы ответили не на все вопросики(",
-                                                                      'about_test': testik.about,
-                                                                      'author': author_of_test,
-                                                                      'date': testik.created_date,
-                                                                      'img': image,
-                                                                      'questions_and_answers': questions_and_answers,
-                                                                      'current_user': current_user,
-                                                                      'test_id': test_id})
+    response = templates.TemplateResponse("testik_result.html", context={"request": request,
+                                                                         "title": 'ТЕСТИК!!! Результатики)',
+                                                                         'test_name': testik.test_name,
+                                                                         'about_test': testik.about,
+                                                                         'author': author_of_test,
+                                                                         'date': testik.created_date,
+                                                                         'img': image,
+                                                                         'questions_and_answers':
+                                                                             questions_and_answers,
+                                                                         'current_user': current_user,
+                                                                         'test_id': test_id,
+                                                                         'end': f'Правильных ответов {count}/{len(true_answers)}, вы справились с тестом на {round(count / len(true_answers) * 100, 2)}%'})
+
     return response
 
 
