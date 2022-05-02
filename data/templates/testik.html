@@ -1,25 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% if warning %}
-        <p class="alert alert-warning">{{ warning }}</p>
-    {% endif %}
-    <h1>{{ test_name }}</h1>
-    <h4>{{ about_test }}</h4>
-    <img src="data:image/jpeg;base64,{{ img }}" width="400" height="300">
-    <h4>Автор теста: {{ author }}</h4>
-    <h4>Тест создан: {{ date }}</h4>
-    <form action="/testik/{{ test_id }}" method="post">
+{% if warning %}
+<p class="alert alert-warning">{{ warning }}</p>
+{% endif %}
+<h1>{{ test_name }}</h1>
+<h4>{{ about_test }}</h4>
+<img src="data:image/jpeg;base64,{{ img }}" width="400" height="300">
+<p>Автор теста: {{ author }}<br>Тест создан: {{ date }}</p>
+<form action="/testik/{{ test_id }}" method="post">
 
-        {% for key, value in questions_and_answers.items() %}
-            <p>{{ key + 1 }}. {{ value['question'] }}
-                {% for answer in value['answers'] %}
-                    <br><input type="radio" class="answer" name="answer{{ key }}" value="{{ answer[0] }}">
-                    {{ answer[0] }}
-                {% endfor %}
-                <br></p>
+    {% for key, value in questions_and_answers.items() %}
+    <p>{{ key + 1 }}. {{ value['question'] }}
+        {% for answer in value['answers'] %}
+        <br><input type="radio" class="answer" name="answer{{ key }}" value="{{ answer[0] }}">
+        {{ answer[0] }}
         {% endfor %}
+        <br></p>
+    {% endfor %}
 
-        <button type="submit" class="btn btn-primary">Готово!</button>
-    </form>
+    <button type="submit" class="btn btn-primary">Готово!</button>
+</form>
 {% endblock %}

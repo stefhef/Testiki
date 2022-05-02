@@ -1,8 +1,13 @@
 #make_test {
-    background-color: lightskyblue;
+    background-color: #54acde;
     border-color: skyblue;
-    color: black;
+    color: white;
     width: 99.1%;
+}
+
+#make_test:hover {
+    background-color: #39a1db;
+    color: #edf7fc;
 }
 
 td {

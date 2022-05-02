@@ -1,36 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
-    <div>
-        <button name="make_test" onclick="window.location.href='/db_ks'" class="btn btn-primary"
-                id="make_test">Создать тестик
-        </button>
-        <table class="test_main w-100">
-            <tr>
-                {% for test in tests %}
-                    {% if loop.index0 % 3 == 0 %}
-                        </tr>
-                        <tr>
-                    {% endif %}
+<link rel="stylesheet" type="text/css" href="/static/css/main.css">
+<div>
+    <button name="make_test" onclick="window.location.href='/db_ks'" class="btn btn-primary"
+            id="make_test">Создать тестик
+    </button>
+    <table class="test_main w-100">
+        <tr>
+            {% for test in tests %}
+            {% if loop.index0 % 3 == 0 %}
+        </tr>
+        <tr>
+            {% endif %}
 
-                    <td>
-                        <a href="/testik/{{ test.id }}">
-                            <div class="card bg-dark text-white">
-                                <div class="d-flex flex-column">
-                                    <img class="card-img" src="data:image/jpeg;base64,{{ test.image }}"
-                                         alt="" height="240"
-                                         width="320">
-                                    <div class="card-img-overlay">
-                                        <p class="card-title">{{ test.test_name }}</p>
-                                        <p class="card-title">{{ test.about }}</p>
-                                    </div>
-                                </div>
+            <td>
+                <a href="/testik/{{ test.id }}">
+                    <div class="card bg-dark text-white">
+                        <div class="d-flex flex-column">
+                            <img class="card-img" src="data:image/jpeg;base64,{{ test.image }}"
+                                 alt="">
+                            <div class="card-img-overlay">
+                                <p class="card-title">{{ test.test_name }}</p>
+                                <p class="card-title">{{ test.about }}</p>
                             </div>
-                        </a>
-                    </td>
-                {% endfor %}
-                </tr>
-        </table>
-    </div>
+                        </div>
+                    </div>
+                </a>
+            </td>
+            {% endfor %}
+        </tr>
+    </table>
+</div>
 {% endblock %}

@@ -330,7 +330,6 @@ async def result_testik(test_id: int,
                     break
                 else:
                     questions_and_answers[key]['answers'][n] = (elem[0], elem[1], False)
-    print(questions_and_answers)
     count = 0
     if len(true_answers) == len(user_answers):
         for true_a, user_a in zip(true_answers, user_answers):

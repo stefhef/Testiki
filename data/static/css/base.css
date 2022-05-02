@@ -31,14 +31,21 @@ a.footer {
     color: #ffffff;
 }
 
+.colord:hover {
+    background-color: #39a1db;
+    color: #edf7fc;
+}
+
 .colord-hover {
     width: 200px;
     border-color: #54acde;
+    color: #54acde;
 }
 
 .colord-hover:hover {
     border-color: #54acde;
     background-color: #54acde;
+    color: #ffffff;
 }
 
 header {
