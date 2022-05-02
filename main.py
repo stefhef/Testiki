@@ -301,8 +301,8 @@ async def result_testik(test_id: int,
 
     all_answers = []
     questions_and_answers = {}
-    author_of_test = await session.execute(select(User.username).where(User.id == testik.author))
-    author_of_test = author_of_test.scalars().first()
+    author_of_test = await session.execute(select(User).where(User.id == testik.author))
+    author_of_test = author_of_test.scalar()
     for i in range(len(q)):
         new_dict = {'question': q[i].question,
                     'answers': []}
