@@ -9,6 +9,8 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select, func, update
 import asyncio
 from fastapi.templating import Jinja2Templates
+from starlette.responses import RedirectResponse
+
 from config import SECRET_KEY, JWT_ALGORITHM
 from core import init_db, get_session, vk_send_message
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -240,9 +242,7 @@ async def obr(request: Request,
     await session.commit()
     await session.close()
 
-    response = templates.TemplateResponse("main.html", {"request": request,
-                                                        "title": 'Главная страница',
-                                                        'current_user': current_user})
+    response = RedirectResponse('/')
     response.set_cookie('answers', '0')
     response.set_cookie('questions', '0')
     return response
@@ -324,12 +324,10 @@ async def result_testik(test_id: int,
             user_answers.append(value)
     for key, value in questions_and_answers.items():
         for n, elem in enumerate(value['answers']):
-            for element in user_answers:
-                if elem[0] == element:
-                    questions_and_answers[key]['answers'][n] = (elem[0], elem[1], True)
-                    break
-                else:
-                    questions_and_answers[key]['answers'][n] = (elem[0], elem[1], False)
+            if elem[0] == user_answers[key]:
+                questions_and_answers[key]['answers'][n] = (elem[0], elem[1], True)
+            else:
+                questions_and_answers[key]['answers'][n] = (elem[0], elem[1], False)
     count = 0
     if len(true_answers) == len(user_answers):
         for true_a, user_a in zip(true_answers, user_answers):

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<link>
     {% if error %}
         <p class="alert alert-danger">{{ error }}</p>
     {% endif %}
@@ -15,7 +16,7 @@
                    placeholder="Введите количество вопросиков" name="questions" required>
             <input type="text" class="form-control" id="answers" aria-describedby="answersHelp"
                    placeholder="Введите количество ответиков на вопрсик" name="answers" required>
-            <button type="submit" class="btn btn-primary">Далее</button>
+            <button type="submit" class="btn btn-primary" style="background-color: #54acde; border-color: skyblue;">Далее</button>
         </form>
     </div>
 {% endblock %}

@@ -10,6 +10,27 @@ td {
     border: 1px solid;
 }
 
+.btn-info {
+    background-color: #54acde;
+    border-color: skyblue;
+}
+
+.btn-info:hover {
+    background-color: #39a1db;
+    color: #edf7fc;
+    border-color: skyblue;
+}
+
+.btn-primary {
+    background-color: #54acde;
+    border-color: skyblue;
+}
+
+.btn-primary:hover {
+    background-color: #39a1db;
+    color: #edf7fc;
+    border-color: skyblue;
+}
 /*.info {*/
 /*    width: 70%;*/
 /*    border-color: black;*/
