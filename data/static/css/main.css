@@ -1,15 +1,12 @@
 #make_test {
-    margin-left: -1%;
-    margin-top: 5%;
     background-color: lightskyblue;
     border-color: skyblue;
     color: black;
-    width: 100%;
+    width: 99.1%;
 }
 
-.test_main {
-    width: 100%;
-    border-color: red;
-    border: 10px;
-    padding: 10px;
+td {
+    padding-right: 7px;
+    padding-bottom: 7px;
+    padding-top: 7px;
 }

@@ -58,15 +58,14 @@ async def login_p(request: Request,
                                                    "error": "Логин или пароль неверны"})
 
     jwt_access_token = await create_access_token_user(user, session)
-    result = templates.TemplateResponse('main.html',
-                                        context={'request': request, 'title': 'Вошли', 'current_user': user})
+    result = RedirectResponse('/', status_code=302)
     result.set_cookie("access_token", jwt_access_token, httponly=True)
     return result
 
 
 @router.get("/test")
 async def test_auth(current_user=Depends(get_current_user)):
-    """Проверка авторизации"""
+    """Тест авторизации"""
     return current_user
 
 
