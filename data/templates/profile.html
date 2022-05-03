@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <link href="/static/css/profile.css" rel="stylesheet" type="text/css">
+    <div class="d-flex flex-column justify-content-center">
+        <div class="d-flex flex-row justify-content-between">
+            <div class="d-flex flex-column justify-content-center">
+                <object class="d-flex justify-content-center">
+                    <img src="data:image/jpeg;base64,{{ image.__str__()[2:-1] }}" alt="Фото профиля"
+                         class="d-flex justify-content-center w-25 h-auto"
+                         style="border-radius: 50%; border: 3px solid #54acde; padding: 5px;">
+                </object>
+                <h1 class="d-flex justify-content-center">{{ name }} {{ surname }}</h1>
+                {% if me %}
+                    <a href="/user/edit_profile" class="btn btn-info cntr"
+                       style="width: 25%; height: auto; margin: auto">Редактировать</a>
+                {% endif %}
+            </div>
+            <div class="d-flex flex-column justify-content-center">
+                <table class="table table-striped info" border="2">
+                    <caption class="table caption-top">Информация</caption>
+                    <tbody>
+                    <tr>
+                        <td>Логин</td>
+                        <td>{{ username }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Почта</td>
+                        <td>{{ email }}</td>
+                    </tr>
+                    <tr>
+                        <td>О вас</td>
+                        <td>{{ about }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <div>
+        <table border="2" align="center">
+            {% if me %}
+                <caption align="top" style="color: black">Мои тесты</caption>
+            {% else %}
+                <caption align="top" style="color: black">Тесты пользователя</caption>
+            {% endif %}
+            <tr>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Дата создания</th>
+                <th>Ссылочка на тест</th>
+            </tr>
+
+            {% for test in user_tests %}
+                <tr>
+                    <td>{{ test.test_name }}</td>
+                    <td>{{ test.about }}</td>
+                    <td>{{ test.created_date }}</td>
+                    <td><a href="/testik/show/{{ test.id }}" class="btn btn-primary">Тык))</a></td>
+                </tr>
+            {% endfor %}
+
+        </table>
+    </div>
+{% endblock %}

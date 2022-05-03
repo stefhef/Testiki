@@ -1,16 +1,14 @@
 from typing import Optional
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi import APIRouter, status, HTTPException, Depends, Response, Request, Form, Cookie
+from fastapi import APIRouter, Depends, Response, Request
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import joinedload
 from user.auth import get_password_hash, verify_password, create_access_token_user, \
-    create_refresh_token_user, get_current_user
-from core.db import get_session
+    get_current_user
+from core import get_session, do_random_image
 from user.models import User
-from core.refresh_token import RefreshToken
 
 templates = Jinja2Templates(directory="data/templates")
 router = APIRouter(
@@ -30,8 +28,9 @@ class Token(BaseModel):
 
 @router.get("/logout")
 async def logout(response: Response):
-    response.delete_cookie("refresh_token")
-    return {"status": "Ok"}
+    response = RedirectResponse('/')
+    response.delete_cookie("access_token")
+    return response
 
 
 @router.get("/login", response_class=HTMLResponse)
@@ -45,78 +44,63 @@ async def login_p(request: Request,
                   session: AsyncSession = Depends(get_session)):
     """Обработчик входа"""
     data = await request.form()
-    if not all(data):
-        return templates.TemplateResponse('login.html', context={'request': request, 'title': 'Не всё введено'})
 
-    user = await session.execute(select(User).where(User.email == data['email']))
+    user = await session.execute(select(User).where(User.username == data['username']))
     user = user.scalars().first()
     if not user:
         return templates.TemplateResponse('login.html',
-                                          context={'request': request, 'title': 'Такого пользователя нет'})
+                                          context={'request': request, 'title': 'Вход',
+                                                   "error": "Логин или пароль неверны"})
 
     if not verify_password(data.get('password', None), user.hashed_password):
         return templates.TemplateResponse('login.html',
-                                          context={'request': request, 'title': 'Пароль неверный'})
+                                          context={'request': request, 'title': 'Вход',
+                                                   "error": "Логин или пароль неверны"})
 
     jwt_access_token = await create_access_token_user(user, session)
-    result = templates.TemplateResponse('login.html',
-                                        context={'request': request, 'title': 'Вошли'})
+    result = RedirectResponse('/', status_code=302)
     result.set_cookie("access_token", jwt_access_token, httponly=True)
     return result
 
 
 @router.get("/test")
 async def test_auth(current_user=Depends(get_current_user)):
-    """Проверка авторизации"""
+    """Тест авторизации"""
     return current_user
 
 
 @router.get("/register", response_class=HTMLResponse)
-async def register_p(request: Request,
-                     session: AsyncSession = Depends(get_session)):
+async def register_p(request: Request):
     return templates.TemplateResponse('register.html', context={'request': request, 'title': 'Авторизация'})
+
+
+@router.get("/lost_password")
+async def lost_password(request: Request):
+    return templates.TemplateResponse("server_response.html", context={'request': request, 'title': 'Хехехе',
+                                                                       'text': 'Ну сами виноваты',
+                                                                       'status': 1})
 
 
 @router.post("/register", response_class=HTMLResponse)
 async def register_p(request: Request,
                      session: AsyncSession = Depends(get_session)):
     data = await request.form()
-    if not all(data.values()):
-        return templates.TemplateResponse('register.html',
-                                          context={'request': request, 'title': 'Не все данные введены'})
     res = await session.execute(select(User).where(User.email == data['email']))
     if res.scalars().first():
         return templates.TemplateResponse('register.html',
-                                          context={'request': request, 'title': 'Почта занята'})
+                                          context={'request': request, 'title': 'Регистрация',
+                                                   "error": "Почта занята"})
     res = await session.execute(select(User).where(User.username == data['username']))
     if res.scalars().first():
         return templates.TemplateResponse('register.html',
-                                          context={'request': request, 'title': 'Логин занят'})
+                                          context={'request': request, 'title': 'Регистрация',
+                                                   "error": "Логин занят"})
     dct = dict()
     for key, value in data.items():
         dct[key] = value
     dct['hashed_password'] = get_password_hash(dct['hashed_password'])
+    dct['image'] = do_random_image(800, 600)
     await session.execute(insert(User).values(**dct))
     await session.commit()
     await session.close()
-    return RedirectResponse('/auth/login')
-
-
-@router.get("/refresh_token", response_model=Token)
-async def refresh(response: Response,
-                  refresh_token: Optional[str] = Cookie(None),
-                  session: AsyncSession = Depends(get_session)):
-    query = await session.execute(select(RefreshToken)
-                                  .where(RefreshToken.token == refresh_token)
-                                  .options(joinedload(RefreshToken.user)))
-    db_refresh_token = query.scalars().first()
-    if db_refresh_token:
-        db_user = db_refresh_token.user
-        jwt_access_token = await create_access_token_user(db_user, session)
-        jwt_refresh_token = await create_refresh_token_user(db_user, session, refresh_token)
-        response.set_cookie("refresh_token", jwt_refresh_token, httponly=True)
-        return Token(access_token=jwt_access_token)
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bad refresh token. Need to reauthorize.")
+    return RedirectResponse('/auth/login', status_code=302)

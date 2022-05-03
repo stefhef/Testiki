@@ -1,7 +1,56 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
     <div>
-        <p>Тут будут тестики</p>
+{#    onclick="window.location.href='/testik/make_test'"#}
+        <a href="/testik/make_test"  class="btn btn-primary"
+                id="make_test">Создать тестик
+        </a>
+        <table class="test_main w-100">
+            <tr>
+                {% for test in tests %}
+                    {% if loop.index0 % 3 == 0 %}
+                        </tr>
+                        <tr>
+                    {% endif %}
+
+                    <td>
+                        <a href="/testik/{{ test.id }}">
+                            <div class="card bg-dark text-white rrrr">
+                                <div class="d-flex flex-column rrrr">
+                                    <img class="card-img" src="data:image/jpeg;base64,{{ test.image }}"
+                                         alt="" style="opacity: 85%">
+                                    <div class="card-img-overlay">
+                                        <p class="card-title k-h5">{{ test.test_name }}</p>
+                                        <p class="card-title k-h6">{{ test.about }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </td>
+                {% endfor %}
+                </tr>
+        </table>
+        {% if warning %}
+            <div class="alert alert-secondary" role="alert">
+                {{ warning }}
+            </div>
+        {% endif %}
+        {% if authors %}
+            <h1>Найденные пользователи:</h1>
+            {% for author in authors %}
+                <div style="margin-bottom: 10px">
+                    <a href="/user/profile/{{ author.id }}">
+                        <div class="d-flex ">
+                            <img src="data:image/jpeg;base64,{{ author.image.__str__()[2:-1] }}" alt="..."
+                                 style="width: 7%; border-radius: 50%;">
+                            <h2 style="color: black; margin-bottom: auto; margin-top: auto; margin-left: 20px">{{ author.username }}
+                                - {{ author.name }} {{ author.surname }}</h2>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        {% endif %}
     </div>
 {% endblock %}

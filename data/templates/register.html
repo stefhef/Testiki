@@ -1,56 +1,46 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="flex p-4 m-6 justify-center" id="register">
-        <h1>Регистрация</h1>
-        <form action="" method="post">
-            <div class="flex p-4 m-6 justify-center">
-                <label for="name">
-                    Имя:
-                </label>
-                <input id="name" name="name" type="text">
-            </div>
+    <link rel="stylesheet" type="text/css" href="/static/css/reg.css"/>
+    {% if error %}
+        <p class="alert alert-danger">{{ error }}</p>
+    {% endif %}
+    <div class="container">
+        <section id="content">
+            <form action="" method="post">
+                <h1>Регистрация</h1>
+                <div class="d-flex flex-row p-1 m-6 justify-center" id="about_user">
+                    <input placeholder="Имя" id="name" name="name" type="text" required style="margin: 3px"
+                           autocomplete="off">
+                    <input placeholder="Фамилия" id="surname" name="surname" type="text" required style="margin: 3px"
+                           autocomplete="off">
+                </div>
 
-            <div class="flex p-4 m-6 justify-center">
-                <label for="surname">
-                    Фамилия:
-                </label>
-                <input id="surname" name="surname" type="text">
-            </div>
+                <div class="flex p-1 m-6 justify-center">
+                    <input placeholder="Логин" id="username" name="username" type="text" required autocomplete="off">
+                </div>
 
-            <div class="flex p-4 m-6 justify-center">
-                <label for="username">
-                    Логин:
-                </label>
-                <input id="username" name="username" type="text">
-            </div>
+                <div class="flex p-1 m-6 justify-center">
+                    <input placeholder="Почта" id="email" name="email" type="email" required autocomplete="off"
+                           style="background: #eae7e7 url('/static/img/email-icon.png') no-repeat; background-position: 10px 10px !important">
+                </div>
 
-            <div class="flex p-4 m-6 justify-center">
-                <label for="email">
-                    Почта:
-                </label>
-                <input id="email" name="email" type="text">
-            </div>
+                <div class="flex p-1 m-6 justify-center">
+                    <input placeholder="Пароль" id="password" name="hashed_password" type="password" required
+                           autocomplete="off">
+                </div>
 
-            <div class="flex p-4 m-6 justify-center">
-                <label for="password">
-                    Пароль:
-                </label>
-                <input type="password" id="password" name="hashed_password">
-            </div>
+                <div class="flex p-1 m-6 justify-center">
+                    <input placeholder="Расскажите о себе" id="about" name="about" type="text" autocomplete="off">
+                </div>
 
-            <div class="flex p-4 m-6 justify-center">
-                <label for="about">
-                    Расскажите немного о себе:
-                </label>
-                <input id="about" name="about" type="text">
-            </div>
+                <div>
+                    <input type="submit" value="Регистрация" class="btn colord" style="margin-bottom: 20px">
+                    <input type="submit" formaction="/auth/login" value="Войти" class="btn colord"
+                           style="margin-bottom: 20px">
+                </div>
 
-            <div>
-                <button type="submit">Зарегистрироваться</button>
-                <button formaction="/auth/login"> Войти</button>
-            </div>
-
-        </form>
+            </form>
+        </section>
     </div>
 {% endblock %}

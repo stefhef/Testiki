@@ -2,7 +2,7 @@ import sqlalchemy.ext.declarative as dec
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "sqlite+aiosqlite:///db/test.db"
+DATABASE_URL = "sqlite+aiosqlite:///db/testiki.db"
 Base = dec.declarative_base()
 
 engine = create_async_engine(
