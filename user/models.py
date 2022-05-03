@@ -28,3 +28,6 @@ class User(Base):
 
     def __repr__(self):
         return f'<User> {self.id} {self.name} {self.surname} {self.email}'
+
+    def __eq__(self, other):
+        return self.id == other.id

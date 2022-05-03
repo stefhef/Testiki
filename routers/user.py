@@ -48,6 +48,7 @@ async def read_users_me(request: Request,
                                            'current_user': site_user})
     query = await session.execute(select(Test).where(Test.author == user.id))
     tests = query.scalars().all()
+    me = True if user == site_user else False
     return templates.TemplateResponse("profile.html", {"request": request,
                                                        "title": "Профиль",
                                                        "name": user.name,
@@ -57,7 +58,8 @@ async def read_users_me(request: Request,
                                                        "about": user.about,
                                                        "image": user.image,
                                                        "user_tests": tests,
-                                                       'current_user': site_user})
+                                                       'current_user': site_user,
+                                                       "me": me})
 
 
 @router.get("/edit_profile")
