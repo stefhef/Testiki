@@ -8,13 +8,14 @@ from sqlalchemy import select, or_
 import asyncio
 from core import init_db, get_session, vk_send_message
 from sqlalchemy.ext.asyncio import AsyncSession
-from routers import auth_router, user_router
+from routers import auth_router, user_router, testiki_router
 from test import Test
 from user import get_current_user, user_availability, User
 
 app = FastAPI()
 app.include_router(auth_router)
 app.include_router(user_router)
+app.include_router(testiki_router)
 app.mount("/static", StaticFiles(directory="data/static"), name="static")
 templates = Jinja2Templates(directory="data/templates")
 

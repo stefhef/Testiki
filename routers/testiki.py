@@ -12,21 +12,24 @@ from core import get_session, do_random_image, do_user_image
 from user import User, get_current_user
 
 templates = Jinja2Templates(directory="data/templates")
-router = APIRouter(
-    prefix="/testik",
-    tags=["testik"]
-)
+router = APIRouter(prefix="/testik")
 
 
-@router.get('/{test_id}')
+@router.get('/show/{test_id}')
 async def testik(test_id: int,
                  request: Request,
                  session: AsyncSession = Depends(get_session),
                  current_user=Depends(get_current_user)):
     testik = await session.execute(select(Test).where(Test.id == test_id))
-    testik = testik.scalars().first()
+    testik = testik.scalar()
+    if not testik:
+        return templates.TemplateResponse('server_response.html',
+                                          {"request": request, "title": "ТЕСТИК!!!",
+                                           'text': "Такого теста нет",
+                                           'status': 1,
+                                           'current_user': current_user})
     author_of_test = await session.execute(select(User).where(User.id == testik.author))
-    author_of_test = author_of_test.scalars().first()
+    author_of_test = author_of_test.scalar()
     questions_and_answers = {}
     q = await session.execute(
         select(Question).join(questions_to_test).join(Test).where(Test.id == test_id))
@@ -54,7 +57,7 @@ async def testik(test_id: int,
     return response
 
 
-@router.post('/{test_id}')
+@router.post('/show/{test_id}')
 async def result_testik(test_id: int,
                         request: Request,
                         session: AsyncSession = Depends(get_session),
@@ -140,7 +143,7 @@ async def make_test(request: Request,
 
 
 @router.post('/make_test')
-async def make_test(request: Request,
+async def make_test_p(request: Request,
                     current_user=Depends(get_current_user)):
     data = await request.form()
     if not all(data.values()):

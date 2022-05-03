@@ -3,9 +3,10 @@
 {% block content %}
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
     <div>
-        <button name="make_test" onclick="window.location.href='/make_test'" class="btn btn-primary"
+{#    onclick="window.location.href='/testik/make_test'"#}
+        <a href="/testik/make_test"  class="btn btn-primary"
                 id="make_test">Создать тестик
-        </button>
+        </a>
         <table class="test_main w-100">
             <tr>
                 {% for test in tests %}
@@ -15,7 +16,7 @@
                     {% endif %}
 
                     <td>
-                        <a href="/testik/{{ test.id }}">
+                        <a href="/testik/show/{{ test.id }}">
                             <div class="card bg-dark text-white">
                                 <div class="d-flex flex-column">
                                     <img class="card-img" src="data:image/jpeg;base64,{{ test.image }}"
