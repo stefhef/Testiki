@@ -138,6 +138,7 @@ async def delete_test(username: str,
                                            'status': 0,
                                            'current_user': current_user})
     await session.execute(delete(User).where(User.username == username))
+    await session.execute(delete(Test).join(User).where(User.username == username))
     await session.commit()
     await session.close()
 
