@@ -31,6 +31,11 @@
                 {% endfor %}
                 </tr>
         </table>
+        {% if warning %}
+        <div class="alert alert-secondary" role="alert">
+            {{ warning }}
+        </div>
+        {% endif %}
         {% if authors %}
         <h1>Найденные пользователи:</h1>
         {% for author in authors %}

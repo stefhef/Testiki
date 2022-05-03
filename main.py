@@ -76,6 +76,10 @@ async def root(request: Request,
     await session.close()
     for test in tests:
         test.image = str(test.image)[2:-1]
+        if len(test.test_name) > 30:
+            test.test_name = f'{test.test_name[:30]}..'
+        if len(test.about) > 100:
+            test.about = f'{test.about[:100]}..'
     return templates.TemplateResponse("main.html",
                                       {"request": request, "title": 'Главная страница',
                                        'current_user': user,
