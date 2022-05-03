@@ -2,7 +2,7 @@ import os
 from typing import Any
 from vk_api.utils import get_random_id
 import vk_api
-from until import chunkify
+from core.until import chunkify
 
 TOKEN = os.environ.get('TOKEN_VK')
 
