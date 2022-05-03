@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from jose import jwt
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, func, update
+from sqlalchemy import select, func, update, or_
 import asyncio
 from config import SECRET_KEY, JWT_ALGORITHM
 from core import init_db, get_session, vk_send_message
@@ -362,6 +362,34 @@ async def result_testik(test_id: int,
                                                                          'end': f'Правильных ответов {count}/{len(true_answers)}, вы справились с тестом на {round(count / len(true_answers) * 100, 2)}%'})
 
     return response
+
+
+@app.post('/search_test')
+async def search_test(request: Request,
+                      session: AsyncSession = Depends(get_session),
+                      current_user=Depends(get_current_user)):
+    data = await request.form()
+    text = data['search']
+    user = await user_availability(request.cookies.get('access_token', None), session)
+    tests = await session.execute(select(Test).where(Test.test_name.like(f'%{text}%')))
+    tests = tests.scalars().all()
+    authors = await session.execute(select(User).where(or_(User.username.like(f'%{text}%'),
+                                                           User.name.like(f'%{text}%'),
+                                                           User.surname.like(f'%{text}%'))))
+    authors = authors.scalars().all()
+    for test in tests:
+        test.image = str(test.image)[2:-1]
+    if tests or authors:
+        return templates.TemplateResponse("main.html",
+                                          {"request": request, "title": text,
+                                           'current_user': user,
+                                           'tests': tests,
+                                           'authors': authors})
+    else:
+        return templates.TemplateResponse("main.html",
+                                          {"request": request, "title": text,
+                                           'current_user': user,
+                                           'warning': 'Ничего не найдено(('})
 
 
 if __name__ == "__main__":
