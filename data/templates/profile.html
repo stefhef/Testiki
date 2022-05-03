@@ -12,30 +12,30 @@
                 </object>
                 <h1 class="d-flex justify-content-center">{{ name }} {{ surname }}</h1>
                 {% if me %}
-                <a href="/user/edit_profile" class="btn btn-info cntr"
-                   style="width: 25%; height: auto; margin: auto">Редактировать</a>
+                    <a href="/user/edit_profile" class="btn btn-info cntr"
+                       style="width: 25%; height: auto; margin: auto">Редактировать</a>
                 {% endif %}
             </div>
-        <div class="d-flex flex-column justify-content-center">
-            <table class="table table-striped info" border="2">
-                <caption class="table caption-top">Информация</caption>
-                <tbody>
-                <tr>
-                    <td>Логин</td>
-                    <td>{{ username }}</td>
-                </tr>
+            <div class="d-flex flex-column justify-content-center">
+                <table class="table table-striped info" border="2">
+                    <caption class="table caption-top">Информация</caption>
+                    <tbody>
+                    <tr>
+                        <td>Логин</td>
+                        <td>{{ username }}</td>
+                    </tr>
 
-                <tr>
-                    <td>Почта</td>
-                    <td>{{ email }}</td>
-                </tr>
-                <tr>
-                    <td>О вас</td>
-                    <td>{{ about }}</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+                    <tr>
+                        <td>Почта</td>
+                        <td>{{ email }}</td>
+                    </tr>
+                    <tr>
+                        <td>О вас</td>
+                        <td>{{ about }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -59,7 +59,7 @@
                     <td>{{ test.test_name }}</td>
                     <td>{{ test.about }}</td>
                     <td>{{ test.created_date }}</td>
-                    <td><a href="/testik/{{ test.id }}" class="btn btn-primary">Тык))</a></td>
+                    <td><a href="/testik/show/{{ test.id }}" class="btn btn-primary">Тык))</a></td>
                 </tr>
             {% endfor %}
 

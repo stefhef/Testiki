@@ -3,9 +3,10 @@
 {% block content %}
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
     <div>
-        <button name="make_test" onclick="window.location.href='/make_test'" class="btn btn-primary"
+{#    onclick="window.location.href='/testik/make_test'"#}
+        <a href="/testik/make_test"  class="btn btn-primary"
                 id="make_test">Создать тестик
-        </button>
+        </a>
         <table class="test_main w-100">
             <tr>
                 {% for test in tests %}
@@ -32,31 +33,24 @@
                 </tr>
         </table>
         {% if warning %}
-        <div class="alert alert-secondary" role="alert">
-            {{ warning }}
-        </div>
+            <div class="alert alert-secondary" role="alert">
+                {{ warning }}
+            </div>
         {% endif %}
         {% if authors %}
-        <h1>Найденные пользователи:</h1>
-        {% for author in authors %}
-        <div>
-            <a href="/user/profile/{{ author.id }}">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0">
-                        <img src="data:image/jpeg;base64,{{ author.image.__str__()[2:-1] }}" alt="..." style="width: 10%; border-radius: 50%;">
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                        <h2 style="color: black">{{ author.username }} - {{ author.name }} {{ author.surname }}</h2>
-                    </div>
+            <h1>Найденные пользователи:</h1>
+            {% for author in authors %}
+                <div style="margin-bottom: 10px">
+                    <a href="/user/profile/{{ author.id }}">
+                        <div class="d-flex ">
+                            <img src="data:image/jpeg;base64,{{ author.image.__str__()[2:-1] }}" alt="..."
+                                 style="width: 7%; border-radius: 50%;">
+                            <h2 style="color: black; margin-bottom: auto; margin-top: auto; margin-left: 20px">{{ author.username }}
+                                - {{ author.name }} {{ author.surname }}</h2>
+                        </div>
+                    </a>
                 </div>
-<!--                <div class="d-flex flex-row">-->
-<!--                    <img src="data:image/jpeg;base64,{{ author.image.__str__()[2:-1] }}"-->
-<!--                         style="height: 10%; border-radius: 50%;">-->
-<!--                    <h2 style="color: black">{{ author.username }} - {{ author.name }} {{ author.surname }}</h2>-->
-<!--                </div>-->
-            </a>
-        </div>
-        {% endfor %}
+            {% endfor %}
         {% endif %}
     </div>
 {% endblock %}

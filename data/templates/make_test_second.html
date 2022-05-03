@@ -1,21 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form action="/obr" method="post" enctype="multipart/form-data">
-    {% for question in range(n_questions) %}
-    <p><input type="text" class="form-control" placeholder="Введите вопросик"
-              name="question{{ question }}">
-        Введите ответики и отметьте какой из них правильный:
-        {% for answer in range(n_answers) %}
-        <br><input type="text" class="answer" name="answer{{ question }}{{ answer }}">
-        <input type="radio" name="is_true{{ question }}" value="{{ question }}{{ answer }}"/>
-        {% endfor %}
+    <form action="/testik/obr" method="post" enctype="multipart/form-data">
+        {% for question in range(n_questions) %}
+            <p><input type="text" class="form-control" placeholder="Введите вопросик"
+                      name="question{{ question }}">
+            Введите ответики и отметьте какой из них правильный:
+            {% for answer in range(n_answers) %}
+                <br><input type="text" class="answer" name="answer{{ question }}{{ answer }}">
+                <input type="radio" name="is_true{{ question }}" value="{{ question }}{{ answer }}"/>
+            {% endfor %}
         {% endfor %}
         <br></p>
-    <div class="form-group">
-        <label for="photo">Приложите фотографию</label>
-        <input type="file" class="form-control-file" id="photo" name="file">
-    </div>
-    <button type="submit" class="btn btn-primary" style="background-color: #54acde; border-color: skyblue;">Завершить</button>
-</form>
+        <div class="form-group">
+            <label for="photo">Приложите фотографию</label>
+            <input type="file" class="form-control-file" id="photo" name="file">
+        </div>
+        <button type="submit" class="btn btn-primary" style="background-color: #54acde; border-color: skyblue;">
+            Завершить
+        </button>
+    </form>
 {% endblock %}
