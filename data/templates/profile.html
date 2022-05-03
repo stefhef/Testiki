@@ -62,7 +62,19 @@
                     <td><a href="/testik/show/{{ test.id }}" class="btn btn-primary">Тык))</a></td>
                 </tr>
             {% endfor %}
-
+            {% if current_user.is_admin %}
+                <script>
+                    function proverka() {
+                        if (confirm("Подтвердить")) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                </script>
+                <a class="btn btn-danger" href="/user/delete/{{ username }}" onclick="return proverka();">Удалить
+                    пользователя</a>
+            {% endif %}
         </table>
     </div>
 {% endblock %}

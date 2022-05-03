@@ -3,7 +3,7 @@ from typing import Optional
 from jose import jwt
 from fastapi.responses import RedirectResponse
 from fastapi import APIRouter, Depends, Request, Cookie
-from sqlalchemy import select, func, update
+from sqlalchemy import select, func, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from config import SECRET_KEY, JWT_ALGORITHM
@@ -144,7 +144,7 @@ async def make_test(request: Request,
 
 @router.post('/make_test')
 async def make_test_p(request: Request,
-                    current_user=Depends(get_current_user)):
+                      current_user=Depends(get_current_user)):
     data = await request.form()
     if not all(data.values()):
         return templates.TemplateResponse('make_test_first.html',
@@ -248,3 +248,25 @@ async def obr(request: Request,
     response.set_cookie('answers', '0')
     response.set_cookie('questions', '0')
     return response
+
+
+@router.get("/delete/{test_id}")
+async def delete_test(test_id: int,
+                      request: Request,
+                      session: AsyncSession = Depends(get_session),
+                      current_user=Depends(get_current_user)):
+    if not current_user.is_admin:
+        return templates.TemplateResponse('server_response.html',
+                                          {"request": request, "title": "Ай-ай-ай",
+                                           'text': "Вы не администратор!!",
+                                           'status': 0,
+                                           'current_user': current_user})
+    await session.execute(delete(Test).where(Test.id == test_id))
+    await session.commit()
+    await session.close()
+
+    return templates.TemplateResponse('server_response.html',
+                                      {"request": request, "title": "Удалён",
+                                       'text': f"Тест {test_id} удалён",
+                                       'status': 2,
+                                       'current_user': current_user})

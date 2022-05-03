@@ -3,6 +3,7 @@
 {% block content %}
     {#  status(1) - Просто сообщение
     status(0) - Ошибка
+    status(2) - Успех
     #}
     {% if status == 1 %}
         <div class="alert alert-info" role="alert">
@@ -10,6 +11,10 @@
         </div>
     {% elif status == 0 %}
         <div class="alert alert-danger" role="alert">
+            {{ text }}
+        </div>
+    {% elif status == 2 %}
+        <div class="alert alert-success" role="alert">
             {{ text }}
         </div>
     {% endif %}
