@@ -5,9 +5,9 @@
         <p class="alert alert-warning">{{ warning }}</p>
     {% endif %}
     <h1>{{ test_name }}</h1>
-    <h4>{{ about_test }}</h4>
     <img src="data:image/jpeg;base64,{{ img.__str__()[2:-1] }}" width="400" height="300">
-    <p><a href="/user/profile/{{ author.id }}" style="color: black">Автор теста: {{ author.username }} <img src="data:image/jpeg;base64,{{ author.image.__str__()[2:-1] }}" height=20></a><br>Тест создан: {{ date }}</p>
+    <h4>{{ about_test }}</h4>
+    <p><a href="/user/profile/{{ author.id }}" style="color: black">Автор теста: {{ author.username }} <img src="data:image/jpeg;base64,{{ author.image.__str__()[2:-1] }}" height=20 style="border-radius: 70%"></a><br>Тест создан: {{ date }}</p>
     <form action="/testik/{{ test_id }}" method="post">
 
         {% for key, value in questions_and_answers.items() %}
