@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from core import get_session, do_user_image, do_random_image
@@ -124,3 +124,26 @@ async def edit_profile_p(request: Request,
 async def read_users_me(current_user=Depends(get_current_user)):
     if current_user.is_admin:
         return current_user
+
+
+@router.get("/delete/{username}")
+async def delete_test(username: str,
+                      request: Request,
+                      session: AsyncSession = Depends(get_session),
+                      current_user=Depends(get_current_user)):
+    if not current_user.is_admin:
+        return templates.TemplateResponse('server_response.html',
+                                          {"request": request, "title": "Ай-ай-ай",
+                                           'text': "Вы не администратор!!",
+                                           'status': 0,
+                                           'current_user': current_user})
+    await session.execute(delete(User).where(User.username == username))
+    await session.execute(delete(Test).join(User).where(User.username == username))
+    await session.commit()
+    await session.close()
+
+    return templates.TemplateResponse('server_response.html',
+                                      {"request": request, "title": "Удалён",
+                                       'text': f"Пользователь {username} удалён",
+                                       'status': 2,
+                                       'current_user': current_user})

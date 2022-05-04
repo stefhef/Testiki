@@ -13,7 +13,20 @@
                 <h1 class="d-flex justify-content-center">{{ name }} {{ surname }}</h1>
                 {% if me %}
                     <a href="/user/edit_profile" class="btn btn-info cntr"
-                       style="width: 25%; height: auto; margin: auto">Редактировать</a>
+                       style="width: 30%; height: auto; margin: auto">Редактировать</a>
+                {% endif %}
+                {% if current_user.is_admin %}
+                    <script>
+                        function proverka() {
+                            if (confirm("Подтвердить")) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+                    </script>
+                    <a class="btn btn-danger" href="/user/delete/{{ username }}" onclick="return proverka();" style="width: 30%; height: auto; margin: auto">Удалить
+                        пользователя</a>
                 {% endif %}
             </div>
             <div class="d-flex flex-column justify-content-center">
