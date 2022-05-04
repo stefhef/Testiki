@@ -1,3 +1,5 @@
+import os
+
 import aiohttp as aiohttp
 import uvicorn as uvicorn
 from fastapi import FastAPI, Request, Depends
@@ -161,4 +163,5 @@ async def search_test(request: Request,
 
 
 if __name__ == "__main__":
-    uvicorn.run('main:app', log_level="info", reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run('main:app', log_level="info", reload=True, host="0.0.0.0", port=port)
