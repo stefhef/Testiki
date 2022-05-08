@@ -5,7 +5,7 @@ from io import BytesIO
 from PIL import Image
 
 
-def do_random_image(width: int, height: int):
+async def do_random_image(width: int, height: int):
     r, g, b = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
     image = Image.new('RGB', (width, height), (r, g, b))
     im_file = BytesIO()
@@ -15,7 +15,7 @@ def do_random_image(width: int, height: int):
     return im_b64
 
 
-def do_user_image(size: tuple, image: bytes):
+async def do_user_image(size: tuple, image: bytes):
     image = Image.open(io.BytesIO(image))
     image = image.convert('RGB')
     img_size = image.size

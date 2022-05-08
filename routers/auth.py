@@ -99,7 +99,7 @@ async def register_p(request: Request,
     for key, value in data.items():
         dct[key] = value
     dct['hashed_password'] = get_password_hash(dct['hashed_password'])
-    dct['image'] = do_random_image(800, 600)
+    dct['image'] = await do_random_image(800, 600)
     await session.execute(insert(User).values(**dct))
     await session.commit()
     await session.close()

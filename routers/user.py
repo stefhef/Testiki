@@ -103,9 +103,9 @@ async def edit_profile_p(request: Request,
         if not photo:
             photo = current_user.image
         else:
-            photo = do_user_image((800, 600), photo)
+            photo = await do_user_image((800, 600), photo)
     else:
-        photo = do_random_image(800, 600)
+        photo = await do_random_image(800, 600)
     dct = {}
     for key, value in data.items():
         if key == "photo":

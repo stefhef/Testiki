@@ -191,9 +191,9 @@ async def obr(request: Request,
     data = await request.form()
     a = await data["file"].read()
     if not a:
-        a = do_random_image(800, 600)
+        a = await do_random_image(800, 600)
     else:
-        a = do_user_image((800, 600), a)
+        a = await do_user_image((800, 600), a)
 
     if not all(data.values()):
         return templates.TemplateResponse('make_test_second.html', context={'request': request,
