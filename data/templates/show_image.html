@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex">
+        <img src="data:image/jpeg;base64,{{ image.__str__()[2:-1] }}" alt="Лиса" width="800" height="800"
+             style="margin: auto;">
+    </div>
+{% endblock %}

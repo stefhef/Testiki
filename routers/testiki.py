@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from config import SECRET_KEY, JWT_ALGORITHM
 from test import Test, questions_to_test, Question, Answer, answers_to_question
-from core import get_session, do_random_image, do_user_image
+from core import get_session, do_random_image, normalize_image
 from user import User, get_current_user
 
 templates = Jinja2Templates(directory="data/templates")
@@ -193,7 +193,7 @@ async def obr(request: Request,
     if not a:
         a = await do_random_image(800, 600)
     else:
-        a = await do_user_image((800, 600), a)
+        a = await normalize_image((800, 600), a)
 
     if not all(data.values()):
         return templates.TemplateResponse('make_test_second.html', context={'request': request,

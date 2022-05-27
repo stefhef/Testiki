@@ -7,7 +7,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select, or_
 import asyncio
-from core import init_db, get_session, vk_send_message
+from core import init_db, get_session, vk_send_message, get_fox, normalize_image
 from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth_router, user_router, testiki_router
 from test import Test
@@ -159,6 +159,19 @@ async def search_test(request: Request,
                                           {"request": request, "title": text,
                                            'current_user': user,
                                            'warning': 'Ничего не найдено(('})
+
+
+@app.get("/fox")
+async def fox(request: Request,
+              session: AsyncSession = Depends(get_session)):
+    user = await user_availability(request.cookies.get('access_token', None), session)
+    img_b = await get_fox()
+    img = await normalize_image((800, 800), img_b)
+    return templates.TemplateResponse("show_image.html", {
+        "request": request,
+        "current_user": user,
+        "image": img
+    })
 
 
 if __name__ == "__main__":

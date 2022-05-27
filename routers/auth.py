@@ -44,9 +44,8 @@ async def login_p(request: Request,
                   session: AsyncSession = Depends(get_session)):
     """Обработчик входа"""
     data = await request.form()
-
     user = await session.execute(select(User).where(User.username == data['username']))
-    user = user.scalars().first()
+    user = user.scalar()
     if not user:
         return templates.TemplateResponse('login.html',
                                           context={'request': request, 'title': 'Вход',
@@ -86,12 +85,12 @@ async def register_p(request: Request,
                      session: AsyncSession = Depends(get_session)):
     data = await request.form()
     res = await session.execute(select(User).where(User.email == data['email']))
-    if res.scalars().first():
+    if res.scalar():
         return templates.TemplateResponse('register.html',
                                           context={'request': request, 'title': 'Регистрация',
                                                    "error": "Почта занята"})
     res = await session.execute(select(User).where(User.username == data['username']))
-    if res.scalars().first():
+    if res.scalar():
         return templates.TemplateResponse('register.html',
                                           context={'request': request, 'title': 'Регистрация',
                                                    "error": "Логин занят"})

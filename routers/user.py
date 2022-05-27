@@ -1,7 +1,7 @@
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
-from core import get_session, do_user_image, do_random_image
+from core import get_session, normalize_image, do_random_image
 from test import Test
 from user import get_current_user, User, user_availability
 from fastapi import APIRouter, Depends, Request
@@ -103,7 +103,7 @@ async def edit_profile_p(request: Request,
         if not photo:
             photo = current_user.image
         else:
-            photo = await do_user_image((800, 600), photo)
+            photo = await normalize_image((800, 600), photo)
     else:
         photo = await do_random_image(800, 600)
     dct = {}

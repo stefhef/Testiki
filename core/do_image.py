@@ -15,7 +15,7 @@ async def do_random_image(width: int, height: int):
     return im_b64
 
 
-async def do_user_image(size: tuple, image: bytes):
+async def normalize_image(size: tuple, image: bytes):
     image = Image.open(io.BytesIO(image))
     image = image.convert('RGB')
     img_size = image.size
