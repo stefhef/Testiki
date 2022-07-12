@@ -10,7 +10,7 @@ from sqlalchemy import select, or_
 import asyncio
 from core import init_db, get_session, vk_send_message
 from sqlalchemy.ext.asyncio import AsyncSession
-from routers import auth_router, user_router, testiki_router
+from routers import auth_router, user_router, testiki_router, messenger_router
 from test import Test
 from user import get_current_user, user_availability, User
 
@@ -18,6 +18,7 @@ app = FastAPI()
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(testiki_router)
+app.include_router(messenger_router)
 app.mount("/static", StaticFiles(directory="data/static"), name="static")
 templates = Jinja2Templates(directory="data/templates")
 
@@ -164,4 +165,4 @@ async def search_test(request: Request,
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run('main:app', log_level="info", reload=True, host="0.0.0.0", port=port)
+    uvicorn.run('main:app', log_level="info", reload=True, host="127.0.0.1", port=port)

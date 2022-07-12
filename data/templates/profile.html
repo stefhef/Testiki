@@ -14,6 +14,9 @@
                 {% if me %}
                     <a href="/user/edit_profile" class="btn btn-info cntr"
                        style="width: 25%; height: auto; margin: auto">Редактировать</a>
+                {% else %}
+                    <a href="/messenger/dialog/{{ id }}" class="btn btn-info cntr"
+                       style="width: 25%; height: auto; margin: auto">Написать</a>
                 {% endif %}
             </div>
             <div class="d-flex flex-column justify-content-center">

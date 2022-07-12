@@ -59,7 +59,8 @@ async def read_users_me(request: Request,
                                                        "image": user.image,
                                                        "user_tests": tests,
                                                        'current_user': site_user,
-                                                       "me": me})
+                                                       "me": me,
+                                                       "id": user.id})
 
 
 @router.get("/edit_profile")

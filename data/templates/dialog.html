@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex flex-column justify-content-center">
+    <form enctype="multipart/form-data" method="post">
+        <table class="table-light table-bordered w-100">
+            <tr>
+                <td>
+                    <input name="message" id="message" type="text" required>
+                </td>
+                <td>
+                    <button type="submit">Отправить</button>
+                </td>
+            </tr>
+
+            {% if messages %}
+                {% for m in messages %}
+                    <tr>
+                        <td>{{ m.text }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </table>
+    </form>
+</div>
+{% endblock %}

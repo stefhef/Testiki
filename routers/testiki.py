@@ -161,7 +161,7 @@ async def make_test_p(request: Request,
     except ValueError:
         return templates.TemplateResponse('make_test_first.html',
                                           context={'request': request, 'title': 'Создание тестиков',
-                                                   "error": "Вы зачем пишите буковки туда, куда надо писать число?... Мы в шоке просто с вас..."})
+                                                   "error": "Вы зачем пишете буковки туда, куда надо писать число?... Мы в шоке просто с вас..."})
 
     answ_and_quest.set_cookie('questions', data['questions'], httponly=True)
     answ_and_quest.set_cookie('answers', data['answers'], httponly=True)
