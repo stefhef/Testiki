@@ -1,9 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
+<link href="/static/css/base.css" rel="stylesheet" type="text/css">
 <div class="d-flex flex-column justify-content-center">
-{% for p in people %}
-<a href="/messenger/dialog/{{ p.id }}">{{ p.name }} {{ p.surname }}</a>
-{% endfor %}
+    {% for p in people %}
+    <a class="btn colord-hover" href="/messenger/dialog/{{ p.id }}" style="margin: 3px; width: 100%">
+        <div class="d-flex flex-row">
+            <img src="data:image/jpeg;base64,{{ p.image.__str__()[2:-1] }}" alt=""
+                 style="margin-right: 10px"
+                 width="29"> {{ p.name }} {{ p.surname }}
+        </div>
+    </a>
+    {% endfor %}
 </div>
 {% endblock %}

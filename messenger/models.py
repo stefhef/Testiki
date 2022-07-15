@@ -31,9 +31,9 @@ class Message(Base):
     user_for_whom_message = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 
     def __repr__(self):
-        return f"ID:{self.id} Текст сообщения: {self.test_name}" \
-               f"ID автора: {self.user_who_sent_message.id}" \
-               f"ID получателя {self.user_who_sent_message.id} Время создания: {self.created_date}"
+        return f"ID:{self.id} Текст сообщения: {self.text}" \
+               f"ID автора: {self.user_who_sent_message}" \
+               f"ID получателя {self.user_who_sent_message} Время создания: {self.created_date}"
 
 
 class Dialog(Base):

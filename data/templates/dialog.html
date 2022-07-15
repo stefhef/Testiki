@@ -1,7 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="d-flex flex-column justify-content-center">
+<link href="/static/css/dialog.css" rel="stylesheet" type="text/css">
+<link href="/static/css/base.css" rel="stylesheet" type="text/css">
+<div>
+    <div class="photo">
+        <img src="data:image/jpeg;base64,{{ other_user.image.__str__()[2:-1] }}" alt="Фото профиля"
+             class="personphoto">
+    </div>
+    <h4>{{ other_user.name }} {{ other_user.surname }}</h4>
+</div>
+
+<div>
     <form enctype="multipart/form-data" method="post">
         <table class="table-light table-bordered w-100">
             <tr>
@@ -9,12 +19,33 @@
                     <input name="message" id="message" type="text" required>
                 </td>
                 <td>
-                    <button type="submit">Отправить</button>
+                    <button type="submit" class="btn colord-hover" style="width: auto">Отправить</button>
                 </td>
             </tr>
 
             {% if messages %}
                 {% for m in messages %}
+                    {% if m.user_who_sent_message == other_user.id %}
+                    <tr style="font-size: 50%; color: blue">
+                        <td>
+                            <div class="photo"><img
+                                    src="data:image/jpeg;base64,{{ other_user.image.__str__()[2:-1] }}"
+                                    alt="Фото профиля"
+                                    class="personphoto d-flex justify-content-center "></div>
+                        </td>
+                        <td>{{ other_user.name }} {{ other_user.surname }} {{ m.created_date }}</td>
+                    </tr>
+                    {% else %}
+                    <tr style="font-size: 50%; color: gray">
+                        <td>
+                            <div class="photo d-flex justify-content-center "><img
+                                    src="data:image/jpeg;base64,{{ user.image.__str__()[2:-1] }}"
+                                    alt="Фото профиля"
+                                    class="personphoto"></div>
+                        </td>
+                        <td>{{ user.name }} {{ user.surname }} {{ m.created_date }}</td>
+                    </tr>
+                    {% endif %}
                     <tr>
                         <td>{{ m.text }}</td>
                     </tr>

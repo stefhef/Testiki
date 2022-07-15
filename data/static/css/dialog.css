@@ -1,0 +1,25 @@
+.photo {
+width: 50px;
+height: 50px;
+margin: 0 auto;
+overflow: hidden;
+border-radius: 50%;
+object-fit: cover;
+}
+
+.personphoto {
+width: auto;
+height: 100%;
+margin: 0 auto;
+}
+
+.clr {
+border-color: #54acde;
+color: #54acde;
+}
+
+.clr:hover {
+border-color: #54acde;
+background-color: #54acde;
+color: #ffffff;
+}

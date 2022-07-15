@@ -26,27 +26,29 @@ async def dialog(other_user_id: int,
                                          Dialog.other_user == other_user_id),
                                     and_(Dialog.user == other_user_id,
                                          Dialog.other_user == current_user.id))))
+    dialog_id = dialog_id.scalar()
 
+    user_dialog = await session.execute(select(User).where(User.id == other_user_id))
+    user_dialog = user_dialog.scalar()
     if dialog_id:
-        try:
-            dialog_id = int(dialog_id.scalar())
-            messages = await session.execute(select(Message).where(Message.dialog_id == dialog_id))
-            messages = messages.scalars().all()
-            response = templates.TemplateResponse("dialog.html", context={"request": request,
-                                                                          "title": 'dialog',
-                                                                          "current_user": user,
-                                                                          'messages': messages,
-                                                                          "user_id": other_user_id})
-        except Exception:
-
-            dialog = Dialog(user=current_user.id, other_user=other_user_id)
-            session.add(dialog)
-            await session.commit()
-            await session.close()
-            response = templates.TemplateResponse("dialog.html", context={"request": request,
+        messages = await session.execute(select(Message).where(Message.dialog_id == dialog_id))
+        messages = messages.scalars().all()[-31:]
+        messages.reverse()
+        response = templates.TemplateResponse("dialog.html", context={"request": request,
                                                                       "title": 'dialog',
                                                                       "current_user": user,
-                                                                      "user_id": other_user_id})
+                                                                      'messages': messages,
+                                                                      "other_user": user_dialog,
+                                                                      "user": current_user})
+    else:
+        dialog = Dialog(user=current_user.id, other_user=other_user_id)
+        session.add(dialog)
+        await session.commit()
+        await session.close()
+        response = templates.TemplateResponse("dialog.html", context={"request": request,
+                                                                      "title": 'dialog',
+                                                                      "current_user": user,
+                                                                      "other_user": user_dialog})
     return response
 
 
