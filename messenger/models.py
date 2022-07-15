@@ -42,3 +42,6 @@ class Dialog(Base):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     user = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     other_user = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+
+    def __repr__(self):
+        return f"ID:{self.id} User:{self.user} Other_user:{self.other_user09o}"
