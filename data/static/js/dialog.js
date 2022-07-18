@@ -10,7 +10,10 @@ function getCookie(name) {
 }
 
 function form_message(text, id) {
-
+    let n_m = document.querySelector("#n_msg");
+    if (n_m) {
+        n_m.remove();
+    }
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.open("GET", "/messenger/data/?id=" + id, false);
     xmlHttp.send(null);
@@ -29,6 +32,9 @@ function form_message(text, id) {
 
 function send_message() {
     let input = document.getElementById("message");
+    if (!input.value) {
+        return
+    }
     const to_id = document.getElementById("user").href.split("/");
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.open("POST", "/messenger/send_message/?msg=" + input.value + "&from_id=" + getCookie("user_id") + "&to_id=" + to_id[to_id.length - 1], true);
