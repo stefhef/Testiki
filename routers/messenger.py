@@ -1,14 +1,11 @@
 import datetime
-
-from jose import jwt
 from fastapi.responses import RedirectResponse
-from fastapi import APIRouter, Depends, Request, Cookie
-from sqlalchemy import select, func, update, or_, and_
+from fastapi import APIRouter, Depends, Request
+from sqlalchemy import select, or_, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
-from config import SECRET_KEY, JWT_ALGORITHM
 from messenger import Message, Dialog
-from core import get_session, do_random_image, do_user_image
+from core import get_session
 from user import User, get_current_user, user_availability
 
 templates = Jinja2Templates(directory="data/templates")
@@ -33,7 +30,6 @@ async def dialog(other_user_id: int,
     if dialog_id:
         messages = await session.execute(select(Message).where(Message.dialog_id == dialog_id))
         messages = messages.scalars().all()[-31:]
-        messages.reverse()
         response = templates.TemplateResponse("dialog.html", context={"request": request,
                                                                       "title": 'dialog',
                                                                       "current_user": user,
@@ -49,6 +45,7 @@ async def dialog(other_user_id: int,
                                                                       "title": 'dialog',
                                                                       "current_user": user,
                                                                       "other_user": user_dialog})
+    response.set_cookie("user_id", current_user.id)
     return response
 
 
@@ -103,6 +100,35 @@ async def post_dialog(other_user_id: int,
         await session.close()
     return RedirectResponse(f"/messenger/dialog/{other_user_id}", status_code=302)
 
+
+@router.get("/data")
+async def data(id: int,
+               session: AsyncSession = Depends(get_session)):
+    user = await session.execute(select(User).where(User.id == id))
+    data = user.scalar()
+    return data.name + data.surname, data.image.__str__()[2:-1]
+
+
+@router.post('/send_message')
+async def send_message(msg,
+                       from_id,
+                       to_id,
+                       session: AsyncSession = Depends(get_session)):
+    dialog_id = await session.execute(
+        select(Dialog.id).where(or_(and_(Dialog.user == from_id,
+                                         Dialog.other_user == to_id),
+                                    and_(Dialog.user == to_id,
+                                         Dialog.other_user == from_id))))
+    dialog_id = int(dialog_id.scalar())
+    message = Message(text=msg,
+                      created_date=datetime.datetime.now(),
+                      dialog_id=dialog_id,
+                      user_who_sent_message=from_id,
+                      user_for_whom_message=to_id)
+    session.add(message)
+    await session.commit()
+    await session.close()
+    return "OK"
 
 """
 @router.get('/show/{test_id}')

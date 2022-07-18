@@ -1,57 +1,63 @@
 {% extends "base.html" %}
 
 {% block content %}
-<link href="/static/css/dialog.css" rel="stylesheet" type="text/css">
-<link href="/static/css/base.css" rel="stylesheet" type="text/css">
-<div>
-    <div class="photo">
-        <img src="data:image/jpeg;base64,{{ other_user.image.__str__()[2:-1] }}" alt="Фото профиля"
-             class="personphoto">
+    <link href="/static/css/dialog.css" rel="stylesheet" type="text/css">
+    <link href="/static/css/base.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+    <div>
+        <div class="photo">
+            <img src="data:image/jpeg;base64,{{ other_user.image.__str__()[2:-1] }}" alt="Фото профиля"
+                 class="personphoto">
+            <a id="user" href="{{ other_user.id }}"></a>
+        </div>
+        <h4 style="text-align: center">{{ other_user.name }} {{ other_user.surname }}</h4>
     </div>
-    <h4>{{ other_user.name }} {{ other_user.surname }}</h4>
-</div>
 
-<div>
-    <form enctype="multipart/form-data" method="post">
-        <table class="table-light table-bordered w-100">
-            <tr>
-                <td>
-                    <input name="message" id="message" type="text" required>
-                </td>
-                <td>
-                    <button type="submit" class="btn colord-hover" style="width: auto">Отправить</button>
-                </td>
-            </tr>
+    <div id="main">
 
+        <div id="container">
             {% if messages %}
                 {% for m in messages %}
                     {% if m.user_who_sent_message == other_user.id %}
-                    <tr style="font-size: 50%; color: blue">
-                        <td>
-                            <div class="photo"><img
-                                    src="data:image/jpeg;base64,{{ other_user.image.__str__()[2:-1] }}"
-                                    alt="Фото профиля"
-                                    class="personphoto d-flex justify-content-center "></div>
-                        </td>
-                        <td>{{ other_user.name }} {{ other_user.surname }} {{ m.created_date }}</td>
-                    </tr>
+
+                        <div style="color: blue" class="d-flex flex-row flex-fill">
+
+                        <div class="photo msg" style="width: 60px; height: 60px; margin: 10px"><img
+                                src="data:image/jpeg;base64,{{ other_user.image.__str__()[2:-1] }}"
+                                alt="Фото профиля"
+                                class="personphoto"></div>
+
+                        <div class="d-flex flex-column flex-fill">
+                        <p class="info">{{ other_user.name }} {{ other_user.surname }} {{ m.created_date.strftime("%G-%m-%d %X") }}</p>
+
                     {% else %}
-                    <tr style="font-size: 50%; color: gray">
-                        <td>
-                            <div class="photo d-flex justify-content-center "><img
-                                    src="data:image/jpeg;base64,{{ user.image.__str__()[2:-1] }}"
-                                    alt="Фото профиля"
-                                    class="personphoto"></div>
-                        </td>
-                        <td>{{ user.name }} {{ user.surname }} {{ m.created_date }}</td>
-                    </tr>
+
+                        <div style="color: gray" class="d-flex flex-row me">
+
+                        <div class="photo msg" style="width: 60px; height: 60px; margin: 10px"><img
+                                src="data:image/jpeg;base64,{{ user.image.__str__()[2:-1] }}"
+                                alt="Фото профиля"
+                                class="personphoto"></div>
+
+                        <div class="d-flex flex-column flex-fill">
+                        <p class="info">{{ user.name }} {{ user.surname }} {{ m.created_date.strftime("%G-%m-%d %X") }}</p>
                     {% endif %}
-                    <tr>
-                        <td>{{ m.text }}</td>
-                    </tr>
+                <p class="text-break message">{{ m.text }}</p></div>
+                </div>
                 {% endfor %}
+            {% else %}
+                <div style="color: gray">Нет сообщений</div>
             {% endif %}
-        </table>
-    </form>
-</div>
+            </div>
+
+            <div class="input-group d-flex">
+                <input name="message" id="message" type="text" required class="input-group-text flex-fill"
+                       style="text-align: left">
+                <button type="submit" class="btn colord-hover" name="submit" id="submit"
+                        onclick="send_message()">Отправить
+                </button>
+            </div>
+            </div>
+            <script src="/static/js/dialog.js"></script>
 {% endblock %}
