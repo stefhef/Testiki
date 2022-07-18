@@ -17,7 +17,6 @@ async def dialog(other_user_id: int,
                  request: Request,
                  session: AsyncSession = Depends(get_session),
                  current_user=Depends(get_current_user)):
-    user = await user_availability(request.cookies.get('access_token', None), session)
     dialog_id = await session.execute(
         select(Dialog.id).where(or_(and_(Dialog.user == current_user.id,
                                          Dialog.other_user == other_user_id),
@@ -32,10 +31,9 @@ async def dialog(other_user_id: int,
         messages = messages.scalars().all()[-31:]
         response = templates.TemplateResponse("dialog.html", context={"request": request,
                                                                       "title": 'dialog',
-                                                                      "current_user": user,
                                                                       'messages': messages,
                                                                       "other_user": user_dialog,
-                                                                      "user": current_user})
+                                                                      "current_user": current_user})
     else:
         dialog = Dialog(user=current_user.id, other_user=other_user_id)
         session.add(dialog)
@@ -43,9 +41,12 @@ async def dialog(other_user_id: int,
         await session.close()
         response = templates.TemplateResponse("dialog.html", context={"request": request,
                                                                       "title": 'dialog',
-                                                                      "current_user": user,
+                                                                      "current_user": current_user,
                                                                       "other_user": user_dialog})
-    await session.execute(update(Message).where(and_(Message.dialog_id == dialog_id, Message.user_for_whom_message == user.id)).values({Message.status: True}))
+    response.set_cookie("user_id", current_user.id)
+    await session.execute(update(Message).where(
+        and_(Message.dialog_id == dialog_id, Message.user_for_whom_message == current_user.id)).values(
+        {Message.status: True}))
     await session.commit()
     await session.close()
     return response
@@ -55,7 +56,6 @@ async def dialog(other_user_id: int,
 async def people(request: Request,
                  session: AsyncSession = Depends(get_session),
                  current_user=Depends(get_current_user)):
-    user = await user_availability(request.cookies.get('access_token', None), session)
     users_for_dialog = await session.execute(
         select(Dialog).where(or_(Dialog.user == current_user.id,
                                  Dialog.other_user == current_user.id)))
@@ -79,7 +79,7 @@ async def people(request: Request,
         users_t.append((us, n))
     response = templates.TemplateResponse("people.html", context={"request": request,
                                                                   "title": 'Люди...',
-                                                                  "current_user": user,
+                                                                  "current_user": current_user,
                                                                   "people": users_t})
     return response
 
@@ -136,45 +136,3 @@ async def send_message(msg,
     await session.commit()
     await session.close()
     return "OK"
-
-"""
-@router.get('/show/{test_id}')
-async def testik(test_id: int,
-                 request: Request,
-                 session: AsyncSession = Depends(get_session),
-                 current_user=Depends(get_current_user)):
-    testik = await session.execute(select(Test).where(Test.id == test_id))
-    testik = testik.scalar()
-    if not testik:
-        return templates.TemplateResponse('server_response.html',
-                                          {"request": request, "title": "ТЕСТИК!!!",
-                                           'text': "Такого теста нет",
-                                           'status': 1,
-                                           'current_user': current_user})
-    author_of_test = await session.execute(select(User).where(User.id == testik.author))
-    author_of_test = author_of_test.scalar()
-    questions_and_answers = {}
-    q = await session.execute(
-        select(Question).join(questions_to_test).join(Test).where(Test.id == test_id))
-    q = q.scalars().all()
-    for i in range(len(q)):
-        new_dict = {'question': q[i].question,
-                    'answers': []}
-        q_id = q[i].id
-        a = await session.execute(
-            select(Answer).join(answers_to_question).join(Question).where(Question.id == q_id))
-        a = a.scalars().all()
-        for el in a:
-            new_dict['answers'].append([el.answer])
-        questions_and_answers[i] = new_dict
-    response = templates.TemplateResponse("testik.html", context={"request": request,
-                                                                  "title": 'ТЕСТИК!!!',
-                                                                  'test_name': testik.test_name,
-                                                                  'about_test': testik.about,
-                                                                  'author': author_of_test,
-                                                                  'date': testik.created_date,
-                                                                  'img': testik.image,
-                                                                  'questions_and_answers': questions_and_answers,
-                                                                  'current_user': current_user,
-                                                                  'test_id': test_id})
-    return response"""

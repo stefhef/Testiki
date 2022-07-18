@@ -2,7 +2,6 @@
 
 {% block content %}
     <link href="/static/css/dialog.css" rel="stylesheet" type="text/css">
-    <link href="/static/css/base.css" rel="stylesheet" type="text/css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 
     <div>
@@ -36,12 +35,12 @@
                         <div style="color: gray" class="d-flex flex-row me">
 
                         <div class="photo msg" style="width: 60px; height: 60px; margin: 10px"><img
-                                src="data:image/jpeg;base64,{{ user.image.__str__()[2:-1] }}"
+                                src="data:image/jpeg;base64,{{ current_user.image.__str__()[2:-1] }}"
                                 alt="Фото профиля"
                                 class="personphoto"></div>
 
                         <div class="d-flex flex-column flex-fill">
-                        <p class="info">{{ user.name }} {{ user.surname }} {{ m.created_date.strftime("%G-%m-%d %X") }}</p>
+                        <p class="info">{{ current_user.name }} {{ current_user.surname }} {{ m.created_date.strftime("%G-%m-%d %X") }}</p>
                     {% endif %}
                 <p class="text-break message">{{ m.text }}</p></div>
                 </div>
