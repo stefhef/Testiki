@@ -1,7 +1,7 @@
 import datetime
 from fastapi.responses import RedirectResponse
 from fastapi import APIRouter, Depends, Request
-from sqlalchemy import select, or_, and_
+from sqlalchemy import select, or_, and_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from messenger import Message, Dialog
@@ -45,7 +45,9 @@ async def dialog(other_user_id: int,
                                                                       "title": 'dialog',
                                                                       "current_user": user,
                                                                       "other_user": user_dialog})
-    response.set_cookie("user_id", current_user.id)
+    await session.execute(update(Message).where(and_(Message.dialog_id == dialog_id, Message.user_for_whom_message == user.id)).values({Message.status: True}))
+    await session.commit()
+    await session.close()
     return response
 
 
@@ -62,14 +64,19 @@ async def people(request: Request,
     if users_for_dialog:
         for p in users_for_dialog:
             if p.user == current_user.id:
-                users.append(p.other_user)
+                users.append((p.other_user, p.id))
             else:
-                users.append(p.user)
+                users.append((p.user, p.id))
+    for i, (u, id_d) in enumerate(users):
+        mess = await session.execute(select(Message).where(
+            and_(Message.dialog_id == id_d, Message.status == 0, Message.user_for_whom_message != u)))
+        mess = mess.scalars().all()
+        users[i] = (u, len(mess))
     users_t = []
-    for u in users:
+    for u, n in users:
         us = await session.execute(select(User).where(User.id == u))
         us = us.scalar()
-        users_t.append(us)
+        users_t.append((us, n))
     response = templates.TemplateResponse("people.html", context={"request": request,
                                                                   "title": 'Люди...',
                                                                   "current_user": user,
