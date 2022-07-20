@@ -1,12 +1,12 @@
 import datetime
 from fastapi.responses import RedirectResponse
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, WebSocket
 from sqlalchemy import select, or_, and_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from messenger import Message, Dialog
 from core import get_session
-from user import User, get_current_user, user_availability
+from user import User, get_current_user
 
 templates = Jinja2Templates(directory="data/templates")
 router = APIRouter(prefix="/messenger")
@@ -27,8 +27,10 @@ async def dialog(other_user_id: int,
     user_dialog = await session.execute(select(User).where(User.id == other_user_id))
     user_dialog = user_dialog.scalar()
     if dialog_id:
-        messages = await session.execute(select(Message).where(Message.dialog_id == dialog_id))
-        messages = messages.scalars().all()[-31:]
+        messages = await session.execute(
+            select(Message).where(Message.dialog_id == dialog_id).limit(30).order_by(Message.id.desc()))
+        messages: list = messages.scalars().all()
+        messages.reverse()
         response = templates.TemplateResponse("dialog.html", context={"request": request,
                                                                       "title": 'dialog',
                                                                       'messages': messages,
@@ -113,7 +115,7 @@ async def data(id: int,
                session: AsyncSession = Depends(get_session)):
     user = await session.execute(select(User).where(User.id == id))
     data = user.scalar()
-    return data.name + data.surname, data.image.__str__()[2:-1]
+    return f"{data.name} {data.surname}", data.image.__str__()[2:-1]
 
 
 @router.post('/send_message')

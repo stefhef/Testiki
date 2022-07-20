@@ -1,15 +1,16 @@
 import os
-
+import datetime
 import aiohttp as aiohttp
 import uvicorn as uvicorn
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, WebSocket, WebSocketDisconnect
 from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, and_
 import asyncio
 from core import init_db, get_session, vk_send_message
 from sqlalchemy.ext.asyncio import AsyncSession
+from messenger import Dialog, Message
 from routers import auth_router, user_router, testiki_router, messenger_router
 from test import Test
 from user import get_current_user, user_availability, User
@@ -21,6 +22,33 @@ app.include_router(testiki_router)
 app.include_router(messenger_router)
 app.mount("/static", StaticFiles(directory="data/static"), name="static")
 templates = Jinja2Templates(directory="data/templates")
+
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: dict[int, WebSocket] = {}
+
+    async def connect(self, self_id, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections[self_id] = websocket
+
+    def disconnect(self, self_id):
+        del self.active_connections[self_id]
+
+    async def send_personal_message(self, self_id, message: str):
+        try:
+            print(f"Message: {message}, Client_id: {self_id}")
+            await self.active_connections[self_id].send_text(message)
+        except KeyError:
+            print("Такого пользователя нет")
+            return
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections.values():
+            await connection.send_text(message)
+
+
+manager = ConnectionManager()
 
 
 @app.on_event("startup")
@@ -161,6 +189,34 @@ async def search_test(request: Request,
                                           {"request": request, "title": text,
                                            'current_user': user,
                                            'warning': 'Ничего не найдено(('})
+
+
+@app.websocket("/messenger/ws")
+async def websocket_endpoint(websocket: WebSocket,
+                             client_id,
+                             session: AsyncSession = Depends(get_session)):
+    await manager.connect(client_id, websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message, to_id = data.split(";")
+            dialog_id = await session.execute(
+                select(Dialog.id).where(or_(and_(Dialog.user == client_id,
+                                                 Dialog.other_user == to_id),
+                                            and_(Dialog.user == to_id,
+                                                 Dialog.other_user == client_id))))
+            dialog_id = int(dialog_id.scalar())
+            message = Message(text=message,
+                              created_date=datetime.datetime.now(),
+                              dialog_id=dialog_id,
+                              user_who_sent_message=client_id,
+                              user_for_whom_message=to_id)
+            session.add(message)
+            await session.commit()
+            await session.close()
+            await manager.send_personal_message(to_id, message.text)
+    except WebSocketDisconnect:
+        manager.disconnect(client_id)
 
 
 if __name__ == "__main__":
