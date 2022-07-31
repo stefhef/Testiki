@@ -65,3 +65,17 @@ function processMessage(event) {
 
 socket.onmessage = processMessage;
 
+function red(id_message) {
+    let xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET", "/messenger/datamessage/?id_message=" + id_message, false);
+    xmlHttp.send(null);
+    let resp = xmlHttp.responseText.split(',');
+    input.value = resp[1].slice(1, -2);
+    let button = document.querySelector(selectors:'#sumbit')
+    button.onclick = red_mess
+    button.textContent = "Сохранить"
+}
+
+function red_mess() {
+
+}

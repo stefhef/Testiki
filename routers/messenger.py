@@ -138,3 +138,11 @@ async def send_message(msg,
     await session.commit()
     await session.close()
     return "OK"
+
+
+@router.get('/datamessage')
+async def datamessage(id_message: int,
+                      session: AsyncSession = Depends(get_session)):
+    data = await session.execute(select(Message).where(Message.id == id_message))
+    data = data.scalar()
+    return data.id, data.text
